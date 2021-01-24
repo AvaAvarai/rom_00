@@ -4,12 +4,11 @@ A prototyping workspace for testing and working with SDL2 within the native C99 
 
 ## Building
 
-- `make` -- Builds a windows executable
+- `make` -- Builds an executable
 - `make clean` -- Removes the built executable
 
 ## Todo
 
-- Replace makefile flags with the sdl2-config bash script to uncouple from Windows dependency.
 - PROTOTYPE! TEST! and LEARN!
 
 ## License

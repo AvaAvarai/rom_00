@@ -1,9 +1,4 @@
-/**
- * Example SDL2 application for initial testing.
- */
-
-#include "SDL2/SDL.h"
-#include <stdio.h>
+#include "common.h"
 
 int main(int argc, char* argv[]) {
 
@@ -24,9 +19,21 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // The window is open: could enter program loop here (see SDL_PollEvent())
-
-    SDL_Delay(3000);
+    int running = 1;
+    while (running) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type)
+            {
+            case SDL_KEYDOWN:
+                running = 0;
+                break;
+            
+            default:
+                break;
+            }
+        }
+    }
 
     SDL_DestroyWindow(window);
 

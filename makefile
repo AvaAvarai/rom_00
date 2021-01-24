@@ -1,10 +1,10 @@
 OBJ_NAME = rom_00
 CC = gcc
 
-OBJS = main.c
+OBJS = src/main.c src/common.h
 
-C_FLAGS = -std=c99 -Wall -pedantic -Wl,-subsystem,windows
-LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2
+C_FLAGS = `sdl2-config --cflags` -std=c99 -pedantic -Wall -Wextra -Wmissing-declarations
+LINKER_FLAGS = `sdl2-config --libs` -lSDL2_mixer -lSDL2_image -lSDL2_ttf -lm
 
 .PHONY: all build clean
 
