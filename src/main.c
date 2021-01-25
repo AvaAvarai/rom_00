@@ -2,29 +2,30 @@
 
 int main(int argc, char* argv[]) {
 
-    SDL_Window *window;
-    SDL_Renderer *renderer;
+    Game_Display game_display;
+    memset(&game_display, 0, sizeof(Game_Display));
+
     SDL_Texture *img;
     int w, h;
 
     SDL_Init(SDL_INIT_VIDEO);
 
-    window = SDL_CreateWindow(
-        "An SDL2 window",                  // window title
-        SDL_WINDOWPOS_UNDEFINED,           // initial x position
-        SDL_WINDOWPOS_UNDEFINED,           // initial y position
-        WIDTH,                               // width, in pixels
-        HEIGHT,                               // height, in pixels
-        SDL_WINDOW_OPENGL                  // flags
+    game_display.window = SDL_CreateWindow(
+        WINDOW_TITLE,
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        WINDOW_WIDTH,
+        WINDOW_HEIGHT,
+        SDL_WINDOW_OPENGL
     );
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_ACCELERATED);
 
-    img = IMG_LoadTexture(renderer, LOAD_SCREEN_PATH);
+    img = IMG_LoadTexture(game_display.renderer, LOAD_SCREEN_PATH);
     SDL_QueryTexture(img, NULL, NULL, &w, &h);
-    SDL_Rect texr; texr.x = WIDTH/2 - w/2; texr.y = HEIGHT/2 - h/2; texr.w = w; texr.h = h;
+    SDL_Rect texr; texr.x = WINDOW_WIDTH/2 - w/2; texr.y = WINDOW_HEIGHT/2 - h/2; texr.w = w; texr.h = h;
 
-    if (window == NULL) {
+    if (game_display.window == NULL) {
         printf("Could not create window: %s\n", SDL_GetError());
         return 1;
     }
@@ -41,15 +42,17 @@ int main(int argc, char* argv[]) {
                     break;
             }
         }
+        SDL_SetRenderDrawColor(game_display.renderer, 0, 255, 255, 255);
+        SDL_RenderClear(game_display.renderer);
 
-        SDL_RenderClear(renderer);
+        SDL_RenderCopy(game_display.renderer, img, NULL, &texr);
 
-        SDL_RenderCopy(renderer, img, NULL, &texr);
-
-        SDL_RenderPresent(renderer);
+        SDL_RenderPresent(game_display.renderer);
     }
 
-    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(game_display.renderer);
+
+    SDL_DestroyWindow(game_display.window);
 
     SDL_Quit();
     return 0;

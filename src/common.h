@@ -1,8 +1,6 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include <stdio.h>
+#include "defs.h"
 
-#define WIDTH 640
-#define HEIGHT 480
-
-#define LOAD_SCREEN_PATH "loading.png"
+extern Game_Display game_display;
