@@ -9,6 +9,8 @@ A prototyping workspace for testing and working with SDL2 within the native C99 
 
 ## Todo
 
+- Main Menu
+- Game entrypoint
 - PROTOTYPE! TEST! and LEARN!
 
 ## License

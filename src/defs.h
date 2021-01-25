@@ -10,3 +10,9 @@ typedef struct Game_Displays {
     SDL_Renderer *renderer;
     SDL_Window *window;
 } Game_Display;
+
+enum gameStates {
+    EXITING = -1,
+    MAIN_MENU = 0,
+    PLAYING = 1
+};

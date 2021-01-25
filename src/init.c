@@ -16,3 +16,8 @@ void initGameDisplays(void) {
         exit(1);
     }
 }
+
+void destroyGameDisplays(void) {
+    SDL_DestroyRenderer(game_display.renderer);
+    SDL_DestroyWindow(game_display.window);
+}
