@@ -1,25 +1,13 @@
-#include "common.h"
+#include "main.h"
 
 int main(int argc, char* argv[]) {
 
-    Game_Display game_display;
     memset(&game_display, 0, sizeof(Game_Display));
 
     SDL_Texture *img;
     int w, h;
 
-    SDL_Init(SDL_INIT_VIDEO);
-
-    game_display.window = SDL_CreateWindow(
-        WINDOW_TITLE,
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
-        SDL_WINDOW_OPENGL
-    );
-
-    game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_ACCELERATED);
+    initGameDisplays();
 
     img = IMG_LoadTexture(game_display.renderer, LOAD_SCREEN_PATH);
     SDL_QueryTexture(img, NULL, NULL, &w, &h);
@@ -42,7 +30,7 @@ int main(int argc, char* argv[]) {
                     break;
             }
         }
-        SDL_SetRenderDrawColor(game_display.renderer, 0, 255, 255, 255);
+        SDL_SetRenderDrawColor(game_display.renderer, 0, 255, 255, 255); // Set background color -- Cyan
         SDL_RenderClear(game_display.renderer);
 
         SDL_RenderCopy(game_display.renderer, img, NULL, &texr);
@@ -50,8 +38,8 @@ int main(int argc, char* argv[]) {
         SDL_RenderPresent(game_display.renderer);
     }
 
+    SDL_DestroyTexture(img);
     SDL_DestroyRenderer(game_display.renderer);
-
     SDL_DestroyWindow(game_display.window);
 
     SDL_Quit();
