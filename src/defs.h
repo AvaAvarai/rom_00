@@ -4,7 +4,9 @@
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-#define LOAD_SCREEN_PATH "loading.png"
+#define MENU_BACKGROUND_PATH "assets/menu.png"
+#define MENU_START_TEXT_PATH "assets/start_text.png"
+#define LOAD_SCREEN_PATH "assets/loading.png"
 
 typedef struct Game_Displays {
     SDL_Renderer *renderer;
