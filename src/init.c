@@ -10,7 +10,7 @@ void initGameDisplays(void) {
         printf("Failed to initialize window: %s\n", SDL_GetError());
         exit(1);
     }
-    game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_ACCELERATED);
+    game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_PRESENTVSYNC);
     if (!game_display.renderer) {
         printf("Failed to initialize renderer: %s\n", SDL_GetError());
         exit(1);

@@ -46,16 +46,11 @@ int main(int argc, char* argv[]) {
     Uint32 fps_current;
     Uint32 fps_frames = 0;
 
-    int game_state = MAIN_MENU;
+    Game_State game_state = MAIN_MENU;
     while (game_state != EXITING) {
         
-        char new_title[50];
-        strcpy(new_title, WINDOW_TITLE);
-        strcat(new_title, " -- ");
-        char snum[5];
-        itoa(fps_current, snum, 10);
-        strcat(new_title, snum);
-        strcat(new_title, "FPS");
+        char new_title[strlen(WINDOW_TITLE) + 20];
+        sprintf(new_title, "%s -- %dFPS", WINDOW_TITLE, fps_current);
 
         SDL_SetWindowTitle(game_display.window, new_title);
 
@@ -73,7 +68,6 @@ int main(int argc, char* argv[]) {
                     break;
             }
         }
-
         switch (game_state) {
             case MAIN_MENU:
                 SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_texr);
@@ -85,15 +79,14 @@ int main(int argc, char* argv[]) {
             default:
                 break;
         }
-
         SDL_RenderPresent(game_display.renderer);
+
         fps_frames++;
         if (fps_lasttime < SDL_GetTicks() - 1000) {
             fps_lasttime = SDL_GetTicks();
             fps_current = fps_frames;
             fps_frames = 0;
         }
-
     }
 
     SDL_DestroyTexture(menu_background);

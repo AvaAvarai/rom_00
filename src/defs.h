@@ -13,8 +13,8 @@ typedef struct Game_Displays {
     SDL_Window *window;
 } Game_Display;
 
-enum gameStates {
+typedef enum Game_States {
     EXITING = -1,
     MAIN_MENU = 0,
     PLAYING = 1
-};
+} Game_State;
