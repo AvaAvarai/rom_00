@@ -13,7 +13,20 @@ int main(int argc, char* argv[]) {
     SDL_Texture *loading_image;
     int load_w, load_h;
 
-    initGameDisplays();
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        printf("Failed to initialize SDL: %s\n", SDL_GetError());
+        cleanup(EXIT_FAILURE);
+    }
+    game_display.window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL);
+    if (!game_display.window) {
+        printf("Failed to initialize window: %s\n", SDL_GetError());
+        cleanup(EXIT_FAILURE);
+    }
+    game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_PRESENTVSYNC);
+    if (!game_display.renderer) {
+        printf("Failed to initialize renderer: %s\n", SDL_GetError());
+        cleanup(EXIT_FAILURE);
+    }
 
     menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);
     SDL_QueryTexture(menu_background, NULL, NULL, &menu_w, &menu_h);
@@ -92,8 +105,16 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(menu_background);
     SDL_DestroyTexture(start_text_img);
     SDL_DestroyTexture(loading_image);
-    destroyGameDisplays();
+    
+    SDL_DestroyRenderer(game_display.renderer);
+    SDL_DestroyWindow(game_display.window);
 
+    cleanup(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
+}
+
+static void cleanup(int exitcode) {
+    IMG_Quit();
     SDL_Quit();
-    return 0;
+    exit(exitcode);
 }
