@@ -9,6 +9,9 @@ A prototyping workspace for testing and working with SDL2 within the native C99 
 
 ## Todo
 
+- Load Texture function
+- Add a debug target in the makefile to retain the console during runtime
+- Test SDL2_ttf to replace text images
 - PROTOTYPE! TEST! and LEARN!
 
 ## License
