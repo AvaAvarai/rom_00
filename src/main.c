@@ -16,6 +16,11 @@ int main(int argc, char* argv[]) {
     SDL_QueryTexture(loading_image, NULL, NULL, &load_w, &load_h);
     SDL_Rect load_rect = {WINDOW_WIDTH/2 - load_w/2, WINDOW_HEIGHT/2 - load_h/2, load_w, load_h};
 
+    SDL_Texture *tile_image = IMG_LoadTexture(game_display.renderer, TILE_PATH);;
+    int tile_w = 0; int tile_h = 0;
+    SDL_QueryTexture(tile_image, NULL, NULL, &tile_w, &tile_h);
+    SDL_Rect tile_rect = {WINDOW_WIDTH/2 - tile_w/2, WINDOW_HEIGHT/2 - tile_h/2, tile_w, tile_h};
+
     TTF_Font *font = TTF_OpenFont(FONT_PATH, 22);
     SDL_Color white_color = {255, 255, 255, 255};
 
@@ -126,6 +131,7 @@ int main(int argc, char* argv[]) {
                 SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_rect);
                 break;
             case PLAYING:
+                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect);
                 SDL_RenderCopy(game_display.renderer, play_sym_texture, NULL, &play_sym_rect);
                 break;
             default:

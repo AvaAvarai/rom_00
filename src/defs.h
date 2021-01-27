@@ -6,6 +6,7 @@
 
 #define MENU_BACKGROUND_PATH "assets/menu.png"
 #define LOAD_SCREEN_PATH "assets/loading.png"
+#define TILE_PATH "assets/tile.png"
 
 #define FONT_PATH "assets/dungeon-grunge.ttf"
 
