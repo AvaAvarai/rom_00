@@ -16,10 +16,23 @@ int main(int argc, char* argv[]) {
     SDL_QueryTexture(loading_image, NULL, NULL, &load_w, &load_h);
     SDL_Rect load_rect = {WINDOW_WIDTH/2 - load_w/2, WINDOW_HEIGHT/2 - load_h/2, load_w, load_h};
 
+    SDL_Texture *paused_image = IMG_LoadTexture(game_display.renderer, PAUSE_SCREEN_PATH);
+    int paused_w = 0; int paused_h = 0;
+    SDL_QueryTexture(paused_image, NULL, NULL, &paused_w, &paused_h);
+    SDL_Rect paused_rect = {WINDOW_WIDTH/2 - paused_w/2, WINDOW_HEIGHT/2 - paused_h/2, paused_w, paused_h};
+
     SDL_Texture *tile_image = IMG_LoadTexture(game_display.renderer, TILE_PATH);;
     int tile_w = 0; int tile_h = 0;
     SDL_QueryTexture(tile_image, NULL, NULL, &tile_w, &tile_h);
-    SDL_Rect tile_rect = {WINDOW_WIDTH/2 - tile_w/2, WINDOW_HEIGHT/2 - tile_h/2, tile_w, tile_h};
+
+    int center_x = WINDOW_WIDTH/2 - tile_w/2;
+    int center_y = WINDOW_HEIGHT/2 - tile_h/2;
+    
+    SDL_Rect tile_rect = {center_x, center_y, tile_w, tile_h};
+    SDL_Rect tile_rect_left = {center_x - tile_w/2, center_y - tile_h/2, tile_w, tile_h};
+    SDL_Rect tile_rect_fwd = {center_x + tile_w/2, center_y - tile_h/2, tile_w, tile_h};
+    SDL_Rect tile_rect_right = {center_x + tile_w/2, center_y + tile_h/2, tile_w, tile_h};
+    SDL_Rect tile_rect_back = {center_x - tile_w/2, center_y + tile_h/2, tile_w, tile_h};
 
     TTF_Font *font = TTF_OpenFont(FONT_PATH, 22);
     SDL_Color white_color = {255, 255, 255, 255};
@@ -60,52 +73,48 @@ int main(int argc, char* argv[]) {
         SDL_Event event;
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
-                case SDL_KEYDOWN:
+                case SDL_KEYDOWN: // TODO: CLEANUP Menu-traversing logic
                     if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
                         clearScreen();
-                        game_state--;
+                        if (game_state == PLAYING) game_state = PAUSED;
+                        else if (game_state == MAIN_MENU) game_state = EXITING;
+                        else if (game_state == PAUSED || game_state == LOADING) game_state = MAIN_MENU;
                         continue;
                     }
                     if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
                         clearScreen();
                         game_state++;
+                        continue;
                     }
+                    else if (game_state == PAUSED) {
+                        clearScreen();
+                        game_state = PLAYING;
+                        continue;
+                    } 
                     if (game_state == PLAYING) { // During game--
                         switch (event.key.keysym.sym) {
+                            case SDLK_a:
                             case SDLK_KP_7:
                                 play_x--;
-                                play_y--;
+                                play_y++;
                                 SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
                                 break;
-                            case SDLK_KP_8:
-                                play_y--;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
-                                break;
+                            case SDLK_w:
                             case SDLK_KP_9:
                                 play_x++;
+                                play_y++;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_s:
+                            case SDLK_KP_1:
+                                play_x--;
                                 play_y--;
                                 SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
                                 break;
-                            case SDLK_KP_4:
-                                play_x--;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
-                                break;
-                            case SDLK_KP_6:
-                                play_x++;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
-                                break;
-                            case SDLK_KP_1:
-                                play_x--;
-                                play_y++;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
-                                break;
-                            case SDLK_KP_2:
-                                play_y++;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
-                                break;
+                            case SDLK_d:
                             case SDLK_KP_3:
                                 play_x++;
-                                play_y++;
+                                play_y--;
                                 SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
                                 break;
                             default:
@@ -130,8 +139,15 @@ int main(int argc, char* argv[]) {
             case LOADING:
                 SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_rect);
                 break;
+            case PAUSED:
+                SDL_RenderCopy(game_display.renderer, paused_image, NULL, &paused_rect);
+                break;
             case PLAYING:
+                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_left);
+                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_fwd);
                 SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect);
+                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_right);
+                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_back);
                 SDL_RenderCopy(game_display.renderer, play_sym_texture, NULL, &play_sym_rect);
                 break;
             default:
