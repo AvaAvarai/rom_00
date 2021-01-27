@@ -10,7 +10,6 @@ A prototyping workspace for testing and working with SDL2 within the native C99 
 
 ## Todo
 
-- Test SDL2_ttf to replace text images
 - PROTOTYPE! TEST! and LEARN!
 
 ## License

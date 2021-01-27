@@ -1,15 +1,13 @@
 #include "main.h"
 
 int main(int argc, char* argv[]) {
-
     // Startup Routines --
-
     memset(&game_display, 0, sizeof(Game_Display));
 
     initSDL();
 
     SDL_Texture *menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);;
-    int menu_w, menu_h;
+    int menu_w, menu_h = 0;
     SDL_QueryTexture(menu_background, NULL, NULL, &menu_w, &menu_h);
     SDL_Rect menu_texr;
     menu_texr.x = WINDOW_WIDTH/2 - menu_w/2;
@@ -18,7 +16,7 @@ int main(int argc, char* argv[]) {
     menu_texr.h = menu_h;
 
     SDL_Texture *start_text_img = IMG_LoadTexture(game_display.renderer, MENU_START_TEXT_PATH);
-    int start_w, start_h;
+    int start_w, start_h = 0;
     SDL_QueryTexture(start_text_img, NULL, NULL, &start_w, &start_h);
     SDL_Rect start_texr;
     start_texr.x = WINDOW_WIDTH/2 - start_w/2;
@@ -27,7 +25,7 @@ int main(int argc, char* argv[]) {
     start_texr.h = start_h;
 
     SDL_Texture *loading_image = IMG_LoadTexture(game_display.renderer, LOAD_SCREEN_PATH);
-    int load_w, load_h;
+    int load_w, load_h = 0;
     SDL_QueryTexture(loading_image, NULL, NULL, &load_w, &load_h);
     SDL_Rect load_texr;
     load_texr.x = WINDOW_WIDTH/2 - load_w/2;
@@ -35,11 +33,18 @@ int main(int argc, char* argv[]) {
     load_texr.w = load_w;
     load_texr.h = load_h;
 
+    TTF_Font *font = TTF_OpenFont(FONT_PATH, 12);
+    SDL_Color color = {255, 255, 255, 255};
+    SDL_Surface *font_surface = TTF_RenderText_Solid(font, "TTF TEST #1", color);
+    SDL_Texture *font_texture = SDL_CreateTextureFromSurface(game_display.renderer, font_surface);
+    int font_w, font_h = 0;
+    SDL_QueryTexture(font_texture, NULL, NULL, &font_w, &font_h);
+    SDL_Rect font_rect = { 0, 0, font_w, font_h };
+
     SDL_SetRenderDrawColor(game_display.renderer, 0, 255, 255, 255); // Set background color -- Cyan
     SDL_RenderClear(game_display.renderer);
 
     // Runtime Routines --
-
     Uint32 fps_lasttime = SDL_GetTicks();
     Uint32 fps_current;
     Uint32 fps_frames = 0;
@@ -78,6 +83,7 @@ int main(int argc, char* argv[]) {
             case MAIN_MENU:
                 SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_texr);
                 SDL_RenderCopy(game_display.renderer, start_text_img, NULL, &start_texr);
+                SDL_RenderCopy(game_display.renderer, font_texture, NULL, &font_rect);
                 break;
             case PLAYING:
                 SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_texr);
@@ -89,13 +95,12 @@ int main(int argc, char* argv[]) {
     }
 
     // Shutdown Routines --
-
     SDL_DestroyTexture(menu_background);
     SDL_DestroyTexture(start_text_img);
     SDL_DestroyTexture(loading_image);
-    
-    SDL_DestroyRenderer(game_display.renderer);
-    SDL_DestroyWindow(game_display.window);
+    TTF_CloseFont(font);
+    SDL_DestroyTexture(font_texture);
+    SDL_FreeSurface(font_surface);
 
     cleanup(EXIT_SUCCESS);
     return EXIT_SUCCESS;
@@ -116,10 +121,24 @@ static void initSDL(void) {
         SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize renderer: %s\n", SDL_GetError());
         cleanup(EXIT_FAILURE);
     }
+    if (IMG_Init(IMG_INIT_PNG) == 0) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize PNG loading libraries: %s\n", SDL_GetError());
+        cleanup(EXIT_FAILURE);
+    }
+    if (TTF_Init() == -1) {
+        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize TTF loading libraries: %s\n", SDL_GetError());
+        cleanup(EXIT_FAILURE);
+    }
 }
 
 static void cleanup(int exitcode) {
+    SDL_DestroyRenderer(game_display.renderer);
+    SDL_DestroyWindow(game_display.window);
+
     IMG_Quit();
+    TTF_Quit();
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
     SDL_Quit();
+
     exit(exitcode);
 }

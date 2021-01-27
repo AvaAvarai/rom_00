@@ -8,6 +8,8 @@
 #define MENU_START_TEXT_PATH "assets/start_text.png"
 #define LOAD_SCREEN_PATH "assets/loading.png"
 
+#define FONT_PATH "assets/dungeon-grunge.ttf"
+
 typedef struct Game_Displays {
     SDL_Renderer *renderer;
     SDL_Window *window;
