@@ -5,7 +5,6 @@
 #define WINDOW_HEIGHT 480
 
 #define MENU_BACKGROUND_PATH "assets/menu.png"
-#define MENU_START_TEXT_PATH "assets/start_text.png"
 #define LOAD_SCREEN_PATH "assets/loading.png"
 
 #define FONT_PATH "assets/dungeon-grunge.ttf"
@@ -18,5 +17,6 @@ typedef struct Game_Displays {
 typedef enum Game_States {
     EXITING = -1,
     MAIN_MENU = 0,
-    PLAYING = 1
+    LOADING = 1,
+    PLAYING = 2
 } Game_State;

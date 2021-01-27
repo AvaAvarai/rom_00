@@ -9,40 +9,27 @@ int main(int argc, char* argv[]) {
     SDL_Texture *menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);;
     int menu_w, menu_h = 0;
     SDL_QueryTexture(menu_background, NULL, NULL, &menu_w, &menu_h);
-    SDL_Rect menu_texr;
-    menu_texr.x = WINDOW_WIDTH/2 - menu_w/2;
-    menu_texr.y = WINDOW_HEIGHT/2 - menu_h/2;
-    menu_texr.w = menu_w;
-    menu_texr.h = menu_h;
-
-    SDL_Texture *start_text_img = IMG_LoadTexture(game_display.renderer, MENU_START_TEXT_PATH);
-    int start_w, start_h = 0;
-    SDL_QueryTexture(start_text_img, NULL, NULL, &start_w, &start_h);
-    SDL_Rect start_texr;
-    start_texr.x = WINDOW_WIDTH/2 - start_w/2;
-    start_texr.y = WINDOW_HEIGHT/2 - start_h/2;
-    start_texr.w = start_w;
-    start_texr.h = start_h;
+    SDL_Rect menu_rect = {WINDOW_WIDTH/2 - menu_w/2, WINDOW_HEIGHT/2 - menu_h/2, menu_w, menu_h};
 
     SDL_Texture *loading_image = IMG_LoadTexture(game_display.renderer, LOAD_SCREEN_PATH);
     int load_w, load_h = 0;
     SDL_QueryTexture(loading_image, NULL, NULL, &load_w, &load_h);
-    SDL_Rect load_texr;
-    load_texr.x = WINDOW_WIDTH/2 - load_w/2;
-    load_texr.y = WINDOW_HEIGHT/2 - load_h/2;
-    load_texr.w = load_w;
-    load_texr.h = load_h;
+    SDL_Rect load_rect = {WINDOW_WIDTH/2 - load_w/2, WINDOW_HEIGHT/2 - load_h/2, load_w, load_h};
 
-    TTF_Font *font = TTF_OpenFont(FONT_PATH, 12);
-    SDL_Color color = {255, 255, 255, 255};
-    SDL_Surface *font_surface = TTF_RenderText_Solid(font, "TTF TEST #1", color);
-    SDL_Texture *font_texture = SDL_CreateTextureFromSurface(game_display.renderer, font_surface);
-    int font_w, font_h = 0;
-    SDL_QueryTexture(font_texture, NULL, NULL, &font_w, &font_h);
-    SDL_Rect font_rect = { 0, 0, font_w, font_h };
+    TTF_Font *font = TTF_OpenFont(FONT_PATH, 22);
+    SDL_Color white_color = {255, 255, 255, 255};
 
-    SDL_SetRenderDrawColor(game_display.renderer, 0, 255, 255, 255); // Set background color -- Cyan
-    SDL_RenderClear(game_display.renderer);
+    SDL_Surface *start_text_surface = TTF_RenderText_Solid(font, "Press Any Key To Start Prototype.", white_color);
+    SDL_Texture *start_text_texture = SDL_CreateTextureFromSurface(game_display.renderer, start_text_surface);
+    int start_text_w, start_text_h = 0;
+    SDL_QueryTexture(start_text_texture, NULL, NULL, &start_text_w, &start_text_h);
+    SDL_Rect start_text_rect = {WINDOW_WIDTH/2 - start_text_w/2, WINDOW_HEIGHT/2 - start_text_h/2, start_text_w, start_text_h};
+
+    SDL_Surface *play_sym_surface = TTF_RenderText_Solid(font, "@", white_color);
+    SDL_Texture *play_sym_texture = SDL_CreateTextureFromSurface(game_display.renderer, play_sym_surface);
+    int play_sym_w, play_sym_h = 0;
+    SDL_QueryTexture(play_sym_texture, NULL, NULL, &play_sym_w, &play_sym_h);
+    SDL_Rect play_sym_rect = {WINDOW_WIDTH/2 - play_sym_w/2, WINDOW_HEIGHT/2 - play_sym_h/2, play_sym_w, play_sym_h};
 
     // Runtime Routines --
     Uint32 fps_lasttime = SDL_GetTicks();
@@ -67,7 +54,10 @@ int main(int argc, char* argv[]) {
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_KEYDOWN:
-                    if (game_state == MAIN_MENU) game_state = PLAYING;
+                    if (game_state == MAIN_MENU || game_state == LOADING) {
+                        clearScreen();
+                        game_state++;
+                    }
                     if (event.key.keysym.sym == SDLK_ESCAPE) game_state = EXITING;
                     break;
                 case SDL_QUIT:
@@ -81,12 +71,14 @@ int main(int argc, char* argv[]) {
         // Rendering --
         switch (game_state) {
             case MAIN_MENU:
-                SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_texr);
-                SDL_RenderCopy(game_display.renderer, start_text_img, NULL, &start_texr);
-                SDL_RenderCopy(game_display.renderer, font_texture, NULL, &font_rect);
+                SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_rect);
+                SDL_RenderCopy(game_display.renderer, start_text_texture, NULL, &start_text_rect);
+                break;
+            case LOADING:
+                SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_rect);
                 break;
             case PLAYING:
-                SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_texr);
+            SDL_RenderCopy(game_display.renderer, play_sym_texture, NULL, &play_sym_rect);
                 break;
             default:
                 break;
@@ -96,11 +88,10 @@ int main(int argc, char* argv[]) {
 
     // Shutdown Routines --
     SDL_DestroyTexture(menu_background);
-    SDL_DestroyTexture(start_text_img);
     SDL_DestroyTexture(loading_image);
     TTF_CloseFont(font);
-    SDL_DestroyTexture(font_texture);
-    SDL_FreeSurface(font_surface);
+    SDL_DestroyTexture(start_text_texture);
+    SDL_FreeSurface(start_text_surface);
 
     cleanup(EXIT_SUCCESS);
     return EXIT_SUCCESS;
@@ -108,27 +99,32 @@ int main(int argc, char* argv[]) {
 
 static void initSDL(void) {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize SDL: %s\n", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize SDL: %s\n", SDL_GetError());
         cleanup(EXIT_FAILURE);
     }
     game_display.window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL);
     if (!game_display.window) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize window: %s\n", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize window: %s\n", SDL_GetError());
         cleanup(EXIT_FAILURE);
     }
     game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_PRESENTVSYNC);
     if (!game_display.renderer) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize renderer: %s\n", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize renderer: %s\n", SDL_GetError());
         cleanup(EXIT_FAILURE);
     }
     if (IMG_Init(IMG_INIT_PNG) == 0) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize PNG loading libraries: %s\n", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize PNG loading libraries: %s\n", IMG_GetError());
         cleanup(EXIT_FAILURE);
     }
     if (TTF_Init() == -1) {
-        SDL_LogCritical(SDL_LOG_CATEGORY_ERROR, "Failed to initialize TTF loading libraries: %s\n", SDL_GetError());
+        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize TTF loading libraries: %s\n", TTF_GetError());
         cleanup(EXIT_FAILURE);
     }
+}
+
+static void clearScreen(void) {
+    SDL_SetRenderDrawColor(game_display.renderer, 0, 255, 255, 255); // Set background color -- Cyan
+    SDL_RenderClear(game_display.renderer);
 }
 
 static void cleanup(int exitcode) {
