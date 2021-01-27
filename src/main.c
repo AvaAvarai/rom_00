@@ -7,12 +7,12 @@ int main(int argc, char* argv[]) {
     initSDL();
 
     SDL_Texture *menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);;
-    int menu_w, menu_h = 0;
+    int menu_w = 0; int menu_h = 0;
     SDL_QueryTexture(menu_background, NULL, NULL, &menu_w, &menu_h);
     SDL_Rect menu_rect = {WINDOW_WIDTH/2 - menu_w/2, WINDOW_HEIGHT/2 - menu_h/2, menu_w, menu_h};
 
     SDL_Texture *loading_image = IMG_LoadTexture(game_display.renderer, LOAD_SCREEN_PATH);
-    int load_w, load_h = 0;
+    int load_w = 0; int load_h = 0;
     SDL_QueryTexture(loading_image, NULL, NULL, &load_w, &load_h);
     SDL_Rect load_rect = {WINDOW_WIDTH/2 - load_w/2, WINDOW_HEIGHT/2 - load_h/2, load_w, load_h};
 
@@ -21,21 +21,23 @@ int main(int argc, char* argv[]) {
 
     SDL_Surface *start_text_surface = TTF_RenderText_Solid(font, "Press Any Key To Start Prototype.", white_color);
     SDL_Texture *start_text_texture = SDL_CreateTextureFromSurface(game_display.renderer, start_text_surface);
-    int start_text_w, start_text_h = 0;
+    int start_text_w = 0; int start_text_h = 0;
     SDL_QueryTexture(start_text_texture, NULL, NULL, &start_text_w, &start_text_h);
     SDL_Rect start_text_rect = {WINDOW_WIDTH/2 - start_text_w/2, WINDOW_HEIGHT/2 - start_text_h/2, start_text_w, start_text_h};
 
     SDL_Surface *play_sym_surface = TTF_RenderText_Solid(font, "@", white_color);
     SDL_Texture *play_sym_texture = SDL_CreateTextureFromSurface(game_display.renderer, play_sym_surface);
-    int play_sym_w, play_sym_h = 0;
+    int play_sym_w = 0; int play_sym_h = 0;
     SDL_QueryTexture(play_sym_texture, NULL, NULL, &play_sym_w, &play_sym_h);
     SDL_Rect play_sym_rect = {WINDOW_WIDTH/2 - play_sym_w/2, WINDOW_HEIGHT/2 - play_sym_h/2, play_sym_w, play_sym_h};
 
+    int play_x = 0; int play_y = 0;
+
     // Runtime Routines --
     Uint32 fps_lasttime = SDL_GetTicks();
-    Uint32 fps_current;
+    Uint32 fps_current = 0;
     Uint32 fps_frames = 0;
-
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Start play_x: %d play_y: %d", play_x, play_y);
     Game_State game_state = MAIN_MENU;
     while (game_state != EXITING) {
         // FPS Calc --
@@ -54,11 +56,57 @@ int main(int argc, char* argv[]) {
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_KEYDOWN:
-                    if (game_state == MAIN_MENU || game_state == LOADING) {
+                    if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
+                        clearScreen();
+                        game_state--;
+                        continue;
+                    }
+                    if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
                         clearScreen();
                         game_state++;
                     }
-                    if (event.key.keysym.sym == SDLK_ESCAPE) game_state = EXITING;
+                    if (game_state == PLAYING) { // During game--
+                        switch (event.key.keysym.sym) {
+                            case SDLK_KP_7:
+                                play_x--;
+                                play_y--;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_KP_8:
+                                play_y--;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_KP_9:
+                                play_x++;
+                                play_y--;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_KP_4:
+                                play_x--;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_KP_6:
+                                play_x++;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_KP_1:
+                                play_x--;
+                                play_y++;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_KP_2:
+                                play_y++;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            case SDLK_KP_3:
+                                play_x++;
+                                play_y++;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                     break;
                 case SDL_QUIT:
                     game_state = EXITING;
@@ -78,7 +126,7 @@ int main(int argc, char* argv[]) {
                 SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_rect);
                 break;
             case PLAYING:
-            SDL_RenderCopy(game_display.renderer, play_sym_texture, NULL, &play_sym_rect);
+                SDL_RenderCopy(game_display.renderer, play_sym_texture, NULL, &play_sym_rect);
                 break;
             default:
                 break;
