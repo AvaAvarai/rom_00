@@ -3,6 +3,8 @@
 #define WINDOW_TITLE "Rom_00"
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
+#define TILE_WIDTH 64
+#define TILE_HEIGHT 32
 
 #define MENU_BACKGROUND_PATH "assets/menu.png"
 #define LOAD_SCREEN_PATH "assets/loading.png"
@@ -15,6 +17,12 @@
 typedef struct Game_Displays {
     SDL_Renderer *renderer;
     SDL_Window *window;
+    SDL_bool starting;
+    struct {
+        int play_sym_w;
+        int play_sym_h;
+        SDL_Rect play_sym_rect;
+    } player;
 } Game_Display;
 
 typedef enum Game_States {

@@ -1,34 +1,47 @@
 #include "main.h"
 
+int map[9][9] = { // Mock Game-World space--
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 1, 1, 0},
+    {0, 1, 0, 0, 0, 0, 0, 1, 0},
+    {0, 0, 1, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 1, 0, 0, 0, 1, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+SDL_Texture *tiles[3];
+
 int main(int argc, char* argv[]) {
     // Startup Routines --
     memset(&game_display, 0, sizeof(Game_Display));
+    game_display.starting = SDL_TRUE;
 
     initSDL();
 
+    // Load Menu Assets--
     SDL_Texture *menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);;
-    int menu_w = 0; int menu_h = 0;
-    SDL_QueryTexture(menu_background, NULL, NULL, &menu_w, &menu_h);
-    SDL_Rect menu_rect = {WINDOW_WIDTH/2 - menu_w/2, WINDOW_HEIGHT/2 - menu_h/2, menu_w, menu_h};
+    int img_w = 0; int img_h = 0;
+    SDL_QueryTexture(menu_background, NULL, NULL, &img_w, &img_h);
+    SDL_Rect menu_rect = {WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
 
     SDL_Texture *loading_image = IMG_LoadTexture(game_display.renderer, LOAD_SCREEN_PATH);
-    int load_w = 0; int load_h = 0;
-    SDL_QueryTexture(loading_image, NULL, NULL, &load_w, &load_h);
-    SDL_Rect load_rect = {WINDOW_WIDTH/2 - load_w/2, WINDOW_HEIGHT/2 - load_h/2, load_w, load_h};
+    SDL_QueryTexture(loading_image, NULL, NULL, &img_w, &img_h);
+    SDL_Rect load_rect = {WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
 
     SDL_Texture *paused_image = IMG_LoadTexture(game_display.renderer, PAUSE_SCREEN_PATH);
-    int paused_w = 0; int paused_h = 0;
-    SDL_QueryTexture(paused_image, NULL, NULL, &paused_w, &paused_h);
-    SDL_Rect paused_rect = {WINDOW_WIDTH/2 - paused_w/2, WINDOW_HEIGHT/2 - paused_h/2, paused_w, paused_h};
+    SDL_QueryTexture(paused_image, NULL, NULL, &img_w, &img_h);
+    SDL_Rect paused_rect = {WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
 
-    SDL_Texture *tile_image = IMG_LoadTexture(game_display.renderer, TILE_PATH);;
-    int tile_w = 0; int tile_h = 0;
-    SDL_QueryTexture(tile_image, NULL, NULL, &tile_w, &tile_h);
-
-    SDL_Texture *tile2_image = IMG_LoadTexture(game_display.renderer, TILE2_PATH);;
-    int tile2_w = 0; int tile2_h = 0;
-    SDL_QueryTexture(tile2_image, NULL, NULL, &tile2_w, &tile2_h);
-
+    // Load Tiles--
+    SDL_Texture *tile_image = IMG_LoadTexture(game_display.renderer, TILE_PATH);
+    SDL_Texture *tile2_image = IMG_LoadTexture(game_display.renderer, TILE2_PATH);
+    tiles[0] = tile_image;
+    tiles[1] = tile2_image;
+    
+    // Load Fonts--
     TTF_Font *title_font = TTF_OpenFont(FONT_PATH, 32);
     TTF_Font *game_font = TTF_OpenFont(FONT_PATH, 22);
     
@@ -36,34 +49,18 @@ int main(int argc, char* argv[]) {
 
     SDL_Surface *start_text_surface = TTF_RenderText_Solid(title_font, "Press Any Key To Start.", white_color);
     SDL_Texture *start_text_texture = SDL_CreateTextureFromSurface(game_display.renderer, start_text_surface);
-    int start_text_w = 0; int start_text_h = 0;
-    SDL_QueryTexture(start_text_texture, NULL, NULL, &start_text_w, &start_text_h);
-    SDL_Rect start_text_rect = {WINDOW_WIDTH/2 - start_text_w/2, WINDOW_HEIGHT/2 - start_text_h/2, start_text_w, start_text_h};
+    SDL_QueryTexture(start_text_texture, NULL, NULL, &img_w, &img_h);
+    SDL_Rect start_text_rect = {WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
 
     SDL_Surface *play_sym_surface = TTF_RenderText_Solid(game_font, "@", white_color);
     SDL_Texture *play_sym_texture = SDL_CreateTextureFromSurface(game_display.renderer, play_sym_surface);
-    int play_sym_w = 0; int play_sym_h = 0;
-    SDL_QueryTexture(play_sym_texture, NULL, NULL, &play_sym_w, &play_sym_h);
+    tiles[2] = play_sym_texture;
 
-    int rect_x = WINDOW_WIDTH/2 - tile_w/8; // Arbitrary tile_w divisor based off font for player sym.
-    int rect_y = WINDOW_HEIGHT/2 - tile_h/2;
-    SDL_Rect play_sym_rect = {rect_x, rect_y, play_sym_w, play_sym_h};
-
-    int starting = 1;
-
-    int play_x = 0; int play_y = 0;
-
-    int map[9][9] = {
-        {0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 1, 1, 0},
-        {0, 1, 0, 0, 0, 0, 0, 1, 0},
-        {0, 0, 1, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 1, 0, 0, 0, 1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
+    game_display.player.play_sym_w = 0;
+    game_display.player.play_sym_h = 0;
+    SDL_QueryTexture(play_sym_texture, NULL, NULL, &game_display.player.play_sym_w, &game_display.player.play_sym_h);
+    game_display.player.play_sym_rect = (SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, game_display.player.play_sym_w, game_display.player.play_sym_h};
+    int play_x = 0; int play_y = 0; // Mock Player Location--
 
     // Runtime Routines --
     Uint32 fps_lasttime = SDL_GetTicks();
@@ -97,6 +94,7 @@ int main(int argc, char* argv[]) {
                     }
                     if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
                         clearScreen();
+                        game_display.starting = SDL_TRUE;
                         game_state++;
                         continue;
                     }
@@ -157,20 +155,7 @@ int main(int argc, char* argv[]) {
                 SDL_RenderCopy(game_display.renderer, paused_image, NULL, &paused_rect);
                 break;
             case PLAYING:
-                for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
-                    for (size_t q = 0; q < sizeof(map[0]) / sizeof(int); q++) {
-                        int new_x = (i - q) * (tile_w / 2) + WINDOW_WIDTH / 2 - tile_w / 2;
-                        int new_y = (i + q) * (tile_h / 2) + WINDOW_HEIGHT / 4 - tile_h / 2 ;
-                        SDL_Rect tile_rect = {new_x, new_y, tile_w, tile_h};
-                        if (map[q][i] == 0) SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect);
-                        else SDL_RenderCopy(game_display.renderer, tile2_image, NULL, &tile_rect);
-                        if (starting == 1) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_x, new_y);
-                        if (starting == 1) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "map[%d][%d] -> %d", (int)i, (int)q, map[i][q]);
-                        
-                    }
-                }
-                SDL_RenderCopy(game_display.renderer, play_sym_texture, NULL, &play_sym_rect);
-                starting = 0;
+                renderFrame();
                 break;
             default:
                 break;
@@ -190,6 +175,25 @@ int main(int argc, char* argv[]) {
 
     cleanup(EXIT_SUCCESS);
     return EXIT_SUCCESS;
+}
+
+static void renderFrame(void) {
+    for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
+        for (size_t q = 0; q < sizeof(map[0]) / sizeof(int); q++) {
+            // Screen Coordinate Selection--
+            int new_tile_x = (i - q) * (TILE_WIDTH / 2) + WINDOW_WIDTH / 2 - TILE_WIDTH / 2;
+            int new_tile_y = (i + q) * (TILE_HEIGHT / 2) + WINDOW_HEIGHT / 4 - TILE_HEIGHT / 2 ;
+            SDL_Rect tile_rect = {new_tile_x, new_tile_y, TILE_WIDTH, TILE_HEIGHT};
+            // Tile Selection--
+            if (map[q][i] == 0) SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
+            else SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
+            // Debug Logging--
+            if (game_display.starting) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_tile_x, new_tile_y);
+            if (game_display.starting) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "map[%d][%d] -> %d", (int)i, (int)q, map[i][q]);              
+        }
+    }
+    SDL_RenderCopy(game_display.renderer, tiles[2], NULL, &game_display.player.play_sym_rect);
+    if (game_display.starting) game_display.starting = SDL_FALSE;
 }
 
 static void initSDL(void) {
