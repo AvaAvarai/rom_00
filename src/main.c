@@ -25,31 +25,45 @@ int main(int argc, char* argv[]) {
     int tile_w = 0; int tile_h = 0;
     SDL_QueryTexture(tile_image, NULL, NULL, &tile_w, &tile_h);
 
-    int center_x = WINDOW_WIDTH/2 - tile_w/2;
-    int center_y = WINDOW_HEIGHT/2 - tile_h/2;
-    
-    SDL_Rect tile_rect = {center_x, center_y, tile_w, tile_h};
-    SDL_Rect tile_rect_left = {center_x - tile_w/2, center_y - tile_h/2, tile_w, tile_h};
-    SDL_Rect tile_rect_fwd = {center_x + tile_w/2, center_y - tile_h/2, tile_w, tile_h};
-    SDL_Rect tile_rect_right = {center_x + tile_w/2, center_y + tile_h/2, tile_w, tile_h};
-    SDL_Rect tile_rect_back = {center_x - tile_w/2, center_y + tile_h/2, tile_w, tile_h};
+    SDL_Texture *tile2_image = IMG_LoadTexture(game_display.renderer, TILE2_PATH);;
+    int tile2_w = 0; int tile2_h = 0;
+    SDL_QueryTexture(tile2_image, NULL, NULL, &tile2_w, &tile2_h);
 
-    TTF_Font *font = TTF_OpenFont(FONT_PATH, 22);
+    TTF_Font *title_font = TTF_OpenFont(FONT_PATH, 32);
+    TTF_Font *game_font = TTF_OpenFont(FONT_PATH, 22);
+    
     SDL_Color white_color = {255, 255, 255, 255};
 
-    SDL_Surface *start_text_surface = TTF_RenderText_Solid(font, "Press Any Key To Start Prototype.", white_color);
+    SDL_Surface *start_text_surface = TTF_RenderText_Solid(title_font, "Press Any Key To Start.", white_color);
     SDL_Texture *start_text_texture = SDL_CreateTextureFromSurface(game_display.renderer, start_text_surface);
     int start_text_w = 0; int start_text_h = 0;
     SDL_QueryTexture(start_text_texture, NULL, NULL, &start_text_w, &start_text_h);
     SDL_Rect start_text_rect = {WINDOW_WIDTH/2 - start_text_w/2, WINDOW_HEIGHT/2 - start_text_h/2, start_text_w, start_text_h};
 
-    SDL_Surface *play_sym_surface = TTF_RenderText_Solid(font, "@", white_color);
+    SDL_Surface *play_sym_surface = TTF_RenderText_Solid(game_font, "@", white_color);
     SDL_Texture *play_sym_texture = SDL_CreateTextureFromSurface(game_display.renderer, play_sym_surface);
     int play_sym_w = 0; int play_sym_h = 0;
     SDL_QueryTexture(play_sym_texture, NULL, NULL, &play_sym_w, &play_sym_h);
-    SDL_Rect play_sym_rect = {WINDOW_WIDTH/2 - play_sym_w/2, WINDOW_HEIGHT/2 - play_sym_h/2, play_sym_w, play_sym_h};
+
+    int rect_x = WINDOW_WIDTH/2 - tile_w/8; // Arbitrary tile_w divisor based off font for player sym.
+    int rect_y = WINDOW_HEIGHT/2 - tile_h/2;
+    SDL_Rect play_sym_rect = {rect_x, rect_y, play_sym_w, play_sym_h};
+
+    int starting = 1;
 
     int play_x = 0; int play_y = 0;
+
+    int map[9][9] = {
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 1, 1, 0},
+        {0, 1, 0, 0, 0, 0, 0, 1, 0},
+        {0, 0, 1, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 1, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
 
     // Runtime Routines --
     Uint32 fps_lasttime = SDL_GetTicks();
@@ -97,25 +111,25 @@ int main(int argc, char* argv[]) {
                             case SDLK_KP_7:
                                 play_x--;
                                 play_y++;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", play_x, play_y);
                                 break;
                             case SDLK_w:
                             case SDLK_KP_9:
                                 play_x++;
                                 play_y++;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", play_x, play_y);
                                 break;
                             case SDLK_s:
                             case SDLK_KP_1:
                                 play_x--;
                                 play_y--;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", play_x, play_y);
                                 break;
                             case SDLK_d:
                             case SDLK_KP_3:
                                 play_x++;
                                 play_y--;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "New play_x: %d play_y: %d", play_x, play_y);
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", play_x, play_y);
                                 break;
                             default:
                                 break;
@@ -129,7 +143,7 @@ int main(int argc, char* argv[]) {
                     break;
             }
         }
-        
+
         // Rendering --
         switch (game_state) {
             case MAIN_MENU:
@@ -143,12 +157,20 @@ int main(int argc, char* argv[]) {
                 SDL_RenderCopy(game_display.renderer, paused_image, NULL, &paused_rect);
                 break;
             case PLAYING:
-                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_left);
-                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_fwd);
-                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect);
-                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_right);
-                SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect_back);
+                for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
+                    for (size_t q = 0; q < sizeof(map[0]) / sizeof(int); q++) {
+                        int new_x = (i - q) * (tile_w / 2) + WINDOW_WIDTH / 2 - tile_w / 2;
+                        int new_y = (i + q) * (tile_h / 2) + WINDOW_HEIGHT / 4 - tile_h / 2 ;
+                        SDL_Rect tile_rect = {new_x, new_y, tile_w, tile_h};
+                        if (map[q][i] == 0) SDL_RenderCopy(game_display.renderer, tile_image, NULL, &tile_rect);
+                        else SDL_RenderCopy(game_display.renderer, tile2_image, NULL, &tile_rect);
+                        if (starting == 1) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_x, new_y);
+                        if (starting == 1) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "map[%d][%d] -> %d", (int)i, (int)q, map[i][q]);
+                        
+                    }
+                }
                 SDL_RenderCopy(game_display.renderer, play_sym_texture, NULL, &play_sym_rect);
+                starting = 0;
                 break;
             default:
                 break;
@@ -159,9 +181,12 @@ int main(int argc, char* argv[]) {
     // Shutdown Routines --
     SDL_DestroyTexture(menu_background);
     SDL_DestroyTexture(loading_image);
-    TTF_CloseFont(font);
+    TTF_CloseFont(title_font);
+    TTF_CloseFont(game_font);
     SDL_DestroyTexture(start_text_texture);
     SDL_FreeSurface(start_text_surface);
+    SDL_DestroyTexture(tile_image);
+    SDL_DestroyTexture(tile2_image);
 
     cleanup(EXIT_SUCCESS);
     return EXIT_SUCCESS;

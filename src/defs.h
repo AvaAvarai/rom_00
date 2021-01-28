@@ -8,6 +8,7 @@
 #define LOAD_SCREEN_PATH "assets/loading.png"
 #define PAUSE_SCREEN_PATH "assets/paused.png"
 #define TILE_PATH "assets/tile.png"
+#define TILE2_PATH "assets/tile2.png"
 
 #define FONT_PATH "assets/dungeon-grunge.ttf"
 
