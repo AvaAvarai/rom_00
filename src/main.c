@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     initSDL();
 
     // Load Menu Assets--
-    SDL_Texture *menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);;
+    SDL_Texture *menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);
     int img_w = 0; int img_h = 0;
     SDL_QueryTexture(menu_background, NULL, NULL, &img_w, &img_h);
     SDL_Rect menu_rect = {WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
@@ -163,23 +163,21 @@ int main(int argc, char* argv[]) {
         SDL_RenderPresent(game_display.renderer);
     }
 
-    // Shutdown Routines --
+    // Shutdown Routines -- TODO: Move remainder to the cleanup function
     SDL_DestroyTexture(menu_background);
     SDL_DestroyTexture(loading_image);
     TTF_CloseFont(title_font);
     TTF_CloseFont(game_font);
     SDL_DestroyTexture(start_text_texture);
     SDL_FreeSurface(start_text_surface);
-    SDL_DestroyTexture(tile_image);
-    SDL_DestroyTexture(tile2_image);
 
     cleanup(EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
 
 static void renderFrame(void) {
-    for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) {
-        for (size_t q = 0; q < sizeof(map[0]) / sizeof(int); q++) {
+    for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) { // Rows--
+        for (size_t q = 0; q < sizeof(map[0]) / sizeof(int); q++) { // Cols--
             // Screen Coordinate Selection--
             int new_tile_x = (i - q) * (TILE_WIDTH / 2) + WINDOW_WIDTH / 2 - TILE_WIDTH / 2;
             int new_tile_y = (i + q) * (TILE_HEIGHT / 2) + WINDOW_HEIGHT / 4 - TILE_HEIGHT / 2 ;
@@ -229,6 +227,11 @@ static void clearScreen(void) {
 static void cleanup(int exitcode) {
     SDL_DestroyRenderer(game_display.renderer);
     SDL_DestroyWindow(game_display.window);
+
+    // TODO: Access/Destroy textures through looping/programmatic process.
+    SDL_DestroyTexture(tiles[0]);
+    SDL_DestroyTexture(tiles[1]);
+    SDL_DestroyTexture(tiles[2]);
 
     IMG_Quit();
     TTF_Quit();

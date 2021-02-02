@@ -2,6 +2,12 @@
 
 A prototyping workspace for testing and working with SDL2 within the native C99 programming language.
 
+## Project Goals
+
+- Test prototyping ideas for isometric roguelikes
+- Further practice programming in C99
+- Learn the SDL2 library and ecosystem
+
 ## Building
 
 - `make` -- Builds an executable
@@ -10,6 +16,7 @@ A prototyping workspace for testing and working with SDL2 within the native C99 
 
 ## Todo
 
+- Test build process in Linux environment
 - PROTOTYPE! TEST! and LEARN!
 
 ## License
