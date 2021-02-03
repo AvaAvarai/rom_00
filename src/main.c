@@ -4,15 +4,16 @@
 #include "stdint.h"
 
 // Function declerations
-static void loadTextures(void);
-static void initSDL(void);
-static void clearScreen(void);
-static void renderMenu(void);
-static void renderLoading(void);
-static void renderPaused(void);
-static void handleInput(void);
-static void renderGame(void);
-static void cleanup(int exitcode);
+static void loadTextures(void); // init module
+static void initSDL(void); // init module
+static void clearScreen(SDL_Color); // rendering module
+static void renderFrame(void); // Entry-point function to rendering module.
+static void renderMenu(void); // rendering module
+static void renderLoading(void); // rendering module
+static void renderPaused(void); // rendering module
+static void handleInput(void); // Entry-point function to controls module.
+static void renderGame(void); // rendering module
+static void cleanup(int exitcode); // init module
 
 // Window and Tile Constants
 #define WINDOW_TITLE  "Rom_00"
@@ -35,18 +36,18 @@ typedef struct Game_Displays {
     SDL_Window *window;
 } Game_Display;
 
-typedef struct Players {
+typedef struct Player_Data {
     int8_t player_x;
     int8_t player_y;
     SDL_Rect play_sym_rect;
 } Player;
 
 typedef enum Game_States {
-    EXITING = -1,
-    MAIN_MENU = 0,
-    LOADING = 1,
-    PLAYING = 2,
-    PAUSED = 3
+    EXITING   = -1,
+    MAIN_MENU =  0,
+    LOADING   =  1,
+    PLAYING   =  2,
+    PAUSED    =  3
 } Game_State;
 
 // Game Data Structure Declarations
@@ -132,24 +133,8 @@ int main(int argc, char* argv[]) {
         handleInput();
 
         // Rendering
-        switch (game_state) {
-            case MAIN_MENU:
-                renderMenu();
-                break;
-            case LOADING:
-                renderLoading();
-                break;
-            case PAUSED:
-                renderPaused();
-                break;
-            case PLAYING:
-                renderGame();
-                break;
-            default:
-                break;
-        }
-        SDL_RenderPresent(game_display.renderer);
-    }
+        renderFrame();
+    } // END MAIN LOOP
 
     // Shutdown Routines
     cleanup(EXIT_SUCCESS);
@@ -164,18 +149,18 @@ static void handleInput(void) {
         switch (event.type) {
             case SDL_KEYDOWN: // TODO: CLEANUP Menu-traversing logic
                 if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
-                    clearScreen();
+                    clearScreen(cyan_color);
                     if (game_state == PLAYING) game_state = PAUSED;
                     else if (game_state == MAIN_MENU) game_state = EXITING;
                     else if (game_state == PAUSED || game_state == LOADING) game_state = MAIN_MENU;
                 }
                 else if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
-                    clearScreen();
+                    clearScreen(cyan_color);
                     initializing = SDL_TRUE;
                     game_state++;
                 }
                 else if (game_state == PAUSED) {
-                    clearScreen();
+                    clearScreen(cyan_color);
                     game_state = PLAYING;
                 } 
                 if (game_state == PLAYING) { // During game--
@@ -218,6 +203,26 @@ static void handleInput(void) {
     }
 }
 
+static void renderFrame(void) {
+    switch (game_state) {
+        case MAIN_MENU:
+            renderMenu();
+            break;
+        case LOADING:
+            renderLoading();
+            break;
+        case PAUSED:
+            renderPaused();
+            break;
+        case PLAYING:
+            renderGame();
+            break;
+        default:
+            break;
+    }
+    SDL_RenderPresent(game_display.renderer);
+}
+
 static void renderMenu(void) {
     SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_rect);
     SDL_RenderCopy(game_display.renderer, start_text_texture, NULL, &start_text_rect);
@@ -232,22 +237,28 @@ static void renderPaused(void) {
 }
 
 static void renderGame(void) {
-    for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) { // Rows--
-        for (size_t q = 0; q < sizeof(map[0]) / sizeof(int); q++) { // Cols--
-            // Screen Coordinate Selection--
-            int new_tile_x = (i - q) * (TILE_WIDTH / 2) + WINDOW_WIDTH / 2 - TILE_WIDTH / 2;
-            int new_tile_y = (i + q) * (TILE_HEIGHT / 2) + WINDOW_HEIGHT / 4 - TILE_HEIGHT / 2 ;
+    for (size_t rows = 0; rows < sizeof(map) / sizeof(map[0]); rows++) {
+        for (size_t cols = 0; cols < sizeof(map[0]) / sizeof(int); cols++) {
+            
+            // Screen Coordinate Selection
+            int new_tile_x = (rows - cols) * (TILE_WIDTH / 2) + WINDOW_WIDTH / 2 - TILE_WIDTH / 2;
+            int new_tile_y = (rows + cols) * (TILE_HEIGHT / 2) + WINDOW_HEIGHT / 4 - TILE_HEIGHT / 2;
             SDL_Rect tile_rect = {new_tile_x, new_tile_y, TILE_WIDTH, TILE_HEIGHT};
-            // Tile Selection--
-            if (map[q][i] == 0) SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
+            
+            // Tile Selection
+            if (map[cols][rows] == 0) SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
             else SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
-            // Debug Logging--
-            if (initializing) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_tile_x, new_tile_y);
-            if (initializing) SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "map[%d][%d] -> %d", (int)i, (int)q, map[i][q]);              
+           
+            // Debug Logging
+            if (initializing) {
+                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_tile_x, new_tile_y);
+                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "map[%d][%d] -> %d", (int)rows, (int)cols, map[rows][cols]);
+            }
         }
     }
+    // Draw Player
     SDL_RenderCopy(game_display.renderer, tiles[2], NULL, &player.play_sym_rect);
-    if (initializing) initializing = SDL_FALSE;
+    if (initializing) initializing = SDL_FALSE; // Done initializing after first renderGame call.
 }
 
 static void initSDL(void) {
@@ -313,8 +324,8 @@ static void loadTextures(void) {
     player.play_sym_rect = (SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32};
 }
 
-static void clearScreen(void) {
-    SDL_SetRenderDrawColor(game_display.renderer, 0, 255, 255, SDL_ALPHA_OPAQUE); // Set background color -- Cyan
+static void clearScreen(SDL_Color clear_color) {
+    SDL_SetRenderDrawColor(game_display.renderer, clear_color.r, clear_color.g, clear_color.b, clear_color.a);
     SDL_RenderClear(game_display.renderer);
 }
 
