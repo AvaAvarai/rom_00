@@ -2,25 +2,18 @@
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 #include "stdint.h"
+#include "init.h"
+#include "defs.h"
 
-// Function declerations
-static void loadTextures(void); // init module
-static void initSDL(void); // init module
-static void clearScreen(SDL_Color); // rendering module
+// Function declarations
 static void renderFrame(void); // Entry-point function to rendering module.
-static void renderMenu(void); // rendering module
-static void renderLoading(void); // rendering module
-static void renderPaused(void); // rendering module
+static void clearScreen(SDL_Color);
+static void renderMenu(void);
+static void renderLoading(void);
+static void renderPaused(void);
+static void renderGame(void);
 static void handleInput(void); // Entry-point function to controls module.
-static void renderGame(void); // rendering module
-static void cleanup(int exitcode); // init module
-
-// Window and Tile Constants
-#define WINDOW_TITLE  "Rom_00"
-#define WINDOW_WIDTH  640
-#define WINDOW_HEIGHT 480
-#define TILE_WIDTH    64
-#define TILE_HEIGHT   32
+static void loadTextures(void);
 
 // Asset Paths
 #define MENU_BACKGROUND_PATH "assets/menu.png"
@@ -29,12 +22,6 @@ static void cleanup(int exitcode); // init module
 #define TILE_PATH            "assets/tile.png"
 #define TILE2_PATH           "assets/tile2.png"
 #define FONT_PATH            "assets/dungeon-grunge.ttf"
-
-// Data Structures
-typedef struct Game_Displays {
-    SDL_Renderer *renderer;
-    SDL_Window *window;
-} Game_Display;
 
 typedef struct Player_Data {
     int8_t player_x;
@@ -107,7 +94,7 @@ int main(int argc, char* argv[]) {
     player.player_x = 0; player.player_y = 0;
     game_state = MAIN_MENU;
 
-    initSDL();
+    initSDL(&game_display);
     loadTextures();
 
     Uint32 fps_lasttime = SDL_GetTicks();
@@ -137,7 +124,15 @@ int main(int argc, char* argv[]) {
     } // END MAIN LOOP
 
     // Shutdown Routines
-    cleanup(EXIT_SUCCESS);
+    // TODO: Access/Destroy textures through looping/programmatic process.
+    SDL_DestroyTexture(tiles[0]);
+    SDL_DestroyTexture(tiles[1]);
+    SDL_DestroyTexture(tiles[2]);
+    SDL_DestroyTexture(menu_background);
+    SDL_DestroyTexture(loading_image);
+    SDL_DestroyTexture(paused_image);
+    SDL_DestroyTexture(start_text_texture);
+    cleanup(&game_display, EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
 
@@ -261,29 +256,9 @@ static void renderGame(void) {
     if (initializing) initializing = SDL_FALSE; // Done initializing after first renderGame call.
 }
 
-static void initSDL(void) {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize SDL: %s\n", SDL_GetError());
-        cleanup(EXIT_FAILURE);
-    }
-    game_display.window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL);
-    if (!game_display.window) {
-        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize window: %s\n", SDL_GetError());
-        cleanup(EXIT_FAILURE);
-    }
-    game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!game_display.renderer) {
-        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize renderer: %s\n", SDL_GetError());
-        cleanup(EXIT_FAILURE);
-    }
-    if (IMG_Init(IMG_INIT_PNG) == 0) {
-        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize PNG loading libraries: %s\n", IMG_GetError());
-        cleanup(EXIT_FAILURE);
-    }
-    if (TTF_Init() == -1) {
-        SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize TTF loading libraries: %s\n", TTF_GetError());
-        cleanup(EXIT_FAILURE);
-    }
+static void clearScreen(SDL_Color clear_color) {
+    SDL_SetRenderDrawColor(game_display.renderer, clear_color.r, clear_color.g, clear_color.b, clear_color.a);
+    SDL_RenderClear(game_display.renderer);
 }
 
 static void loadTextures(void) {
@@ -322,30 +297,4 @@ static void loadTextures(void) {
     tiles[2] = play_sym_texture;
 
     player.play_sym_rect = (SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32};
-}
-
-static void clearScreen(SDL_Color clear_color) {
-    SDL_SetRenderDrawColor(game_display.renderer, clear_color.r, clear_color.g, clear_color.b, clear_color.a);
-    SDL_RenderClear(game_display.renderer);
-}
-
-static void cleanup(int exitcode) {
-    SDL_DestroyRenderer(game_display.renderer);
-    SDL_DestroyWindow(game_display.window);
-
-    // TODO: Access/Destroy textures through looping/programmatic process.
-    SDL_DestroyTexture(tiles[0]);
-    SDL_DestroyTexture(tiles[1]);
-    SDL_DestroyTexture(tiles[2]);
-    SDL_DestroyTexture(menu_background);
-    SDL_DestroyTexture(loading_image);
-    SDL_DestroyTexture(paused_image);
-    SDL_DestroyTexture(start_text_texture);
-
-    IMG_Quit();
-    TTF_Quit();
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-    SDL_Quit();
-
-    exit(exitcode);
 }

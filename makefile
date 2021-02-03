@@ -3,7 +3,7 @@ DEBUG_OBJ_NAME = debug_$(OBJ_NAME)
 
 CC = gcc
 
-OBJS = src/main.c
+OBJS = src/*.c src/*.h
 
 C_FLAGS = `sdl2-config --cflags` -std=c99 -pedantic
 LINKER_FLAGS = `sdl2-config --libs` -lSDL2_mixer -lSDL2_image -lSDL2_ttf -lm
