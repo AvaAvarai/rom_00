@@ -7,7 +7,11 @@
 static void loadTextures(void);
 static void initSDL(void);
 static void clearScreen(void);
-static void renderFrame(void);
+static void renderMenu(void);
+static void renderLoading(void);
+static void renderPaused(void);
+static void handleInput(void);
+static void renderGame(void);
 static void cleanup(int exitcode);
 
 // Window and Tile Constants
@@ -53,6 +57,7 @@ SDL_bool initializing;
 
 // Color Definitions
 SDL_Color white_color = {255, 255, 255, SDL_ALPHA_OPAQUE};
+SDL_Color cyan_color = {0, 255, 255, SDL_ALPHA_OPAQUE};
 
 // Menu Asset Declarations
 SDL_Texture *menu_background;
@@ -90,30 +95,32 @@ int map[9][9] = {
 };
 
 int main(int argc, char* argv[]) {
-    // Startup Routines
+    
+    // Initialization
     (void)argc; (void)argv;
     memset(&game_display, 0, sizeof(Game_Display));
     memset(&player, 0, sizeof(Player));
     memset(&game_state, 0, sizeof(Game_State));
     memset(&initializing, 0, sizeof(initializing));
-    player.player_x = 0; player.player_y = 0;
-
     initializing = SDL_TRUE;
+    player.player_x = 0; player.player_y = 0;
+    game_state = MAIN_MENU;
 
     initSDL();
-
     loadTextures();
 
-    // Runtime Routines
     Uint32 fps_lasttime = SDL_GetTicks();
     Uint32 fps_current = 0;
     Uint32 fps_frames = 0;
-    game_state = MAIN_MENU;
+
     while (game_state != EXITING) {
-        // FPS Calc
+
+        // Display current FPS Calculation
         char new_title[strlen(WINDOW_TITLE) + 20];
         sprintf(new_title, "%s -- %dFPS", WINDOW_TITLE, fps_current);
         SDL_SetWindowTitle(game_display.window, new_title);
+        
+        // FPS Calculation
         fps_frames++;
         if (fps_lasttime < SDL_GetTicks() - 1000) {
             fps_lasttime = SDL_GetTicks();
@@ -121,82 +128,22 @@ int main(int argc, char* argv[]) {
             fps_frames = 0;
         }
 
-        // Input --
-        SDL_Event event;
-        if (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_KEYDOWN: // TODO: CLEANUP Menu-traversing logic
-                    if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
-                        clearScreen();
-                        if (game_state == PLAYING) game_state = PAUSED;
-                        else if (game_state == MAIN_MENU) game_state = EXITING;
-                        else if (game_state == PAUSED || game_state == LOADING) game_state = MAIN_MENU;
-                        continue;
-                    }
-                    if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
-                        clearScreen();
-                        initializing = SDL_TRUE;
-                        game_state++;
-                        continue;
-                    }
-                    else if (game_state == PAUSED) {
-                        clearScreen();
-                        game_state = PLAYING;
-                        continue;
-                    } 
-                    if (game_state == PLAYING) { // During game--
-                        switch (event.key.keysym.sym) {
-                            case SDLK_a:
-                            case SDLK_KP_7:
-                                player.player_x--;
-                                player.player_y++;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
-                                break;
-                            case SDLK_w:
-                            case SDLK_KP_9:
-                                player.player_x++;
-                                player.player_y++;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
-                                break;
-                            case SDLK_s:
-                            case SDLK_KP_1:
-                                player.player_x--;
-                                player.player_y--;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
-                                break;
-                            case SDLK_d:
-                            case SDLK_KP_3:
-                                player.player_x++;
-                                player.player_y--;
-                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    break;
-                case SDL_QUIT:
-                    game_state = EXITING;
-                    break;
-                default:
-                    break;
-            }
-        }
+        // Input
+        handleInput();
 
-        // Rendering --
+        // Rendering
         switch (game_state) {
             case MAIN_MENU:
-                SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_rect);
-                SDL_RenderCopy(game_display.renderer, start_text_texture, NULL, &start_text_rect);
+                renderMenu();
                 break;
             case LOADING:
-                SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_rect);
+                renderLoading();
                 break;
             case PAUSED:
-                SDL_RenderCopy(game_display.renderer, paused_image, NULL, &paused_rect);
+                renderPaused();
                 break;
             case PLAYING:
-                renderFrame();
+                renderGame();
                 break;
             default:
                 break;
@@ -209,7 +156,82 @@ int main(int argc, char* argv[]) {
     return EXIT_SUCCESS;
 }
 
-static void renderFrame(void) {
+// END OF MAIN -- TODO: Move functions to following modules. (1. Rendering 2. Input 3. Init | Load | Cleanup | Closing)
+
+static void handleInput(void) {
+    SDL_Event event;
+    if (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_KEYDOWN: // TODO: CLEANUP Menu-traversing logic
+                if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
+                    clearScreen();
+                    if (game_state == PLAYING) game_state = PAUSED;
+                    else if (game_state == MAIN_MENU) game_state = EXITING;
+                    else if (game_state == PAUSED || game_state == LOADING) game_state = MAIN_MENU;
+                }
+                else if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
+                    clearScreen();
+                    initializing = SDL_TRUE;
+                    game_state++;
+                }
+                else if (game_state == PAUSED) {
+                    clearScreen();
+                    game_state = PLAYING;
+                } 
+                if (game_state == PLAYING) { // During game--
+                    switch (event.key.keysym.sym) {
+                        case SDLK_a:
+                        case SDLK_KP_7:
+                            player.player_x--;
+                            player.player_y++;
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            break;
+                        case SDLK_w:
+                        case SDLK_KP_9:
+                            player.player_x++;
+                            player.player_y++;
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            break;
+                        case SDLK_s:
+                        case SDLK_KP_1:
+                            player.player_x--;
+                            player.player_y--;
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            break;
+                        case SDLK_d:
+                        case SDLK_KP_3:
+                            player.player_x++;
+                            player.player_y--;
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                break;
+            case SDL_QUIT:
+                game_state = EXITING;
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+static void renderMenu(void) {
+    SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_rect);
+    SDL_RenderCopy(game_display.renderer, start_text_texture, NULL, &start_text_rect);
+}
+
+static void renderLoading(void) {
+    SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_rect);
+}
+
+static void renderPaused(void) {
+    SDL_RenderCopy(game_display.renderer, paused_image, NULL, &paused_rect);
+}
+
+static void renderGame(void) {
     for (size_t i = 0; i < sizeof(map) / sizeof(map[0]); i++) { // Rows--
         for (size_t q = 0; q < sizeof(map[0]) / sizeof(int); q++) { // Cols--
             // Screen Coordinate Selection--
