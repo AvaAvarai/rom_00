@@ -5,7 +5,7 @@
 #include "init.h"
 #include "defs.h"
 
-// Function declarations
+// Function declarations TODO: Add rendering class, Add controls class
 static void renderFrame(void); // Entry-point function to rendering module.
 static void clearScreen(SDL_Color);
 static void renderMenu(void);
@@ -13,39 +13,12 @@ static void renderLoading(void);
 static void renderPaused(void);
 static void renderGame(void);
 static void handleInput(void); // Entry-point function to controls module.
-static void loadTextures(void);
-
-// Asset Paths
-#define MENU_BACKGROUND_PATH "assets/menu.png"
-#define LOAD_SCREEN_PATH     "assets/loading.png"
-#define PAUSE_SCREEN_PATH    "assets/paused.png"
-#define TILE_PATH            "assets/tile.png"
-#define TILE2_PATH           "assets/tile2.png"
-#define FONT_PATH            "assets/dungeon-grunge.ttf"
-
-typedef struct Player_Data {
-    int8_t player_x;
-    int8_t player_y;
-    SDL_Rect play_sym_rect;
-} Player;
-
-typedef enum Game_States {
-    EXITING   = -1,
-    MAIN_MENU =  0,
-    LOADING   =  1,
-    PLAYING   =  2,
-    PAUSED    =  3
-} Game_State;
 
 // Game Data Structure Declarations
 Game_Display game_display;
 Player player;
 Game_State game_state;
 SDL_bool initializing;
-
-// Color Definitions
-SDL_Color white_color = {255, 255, 255, SDL_ALPHA_OPAQUE};
-SDL_Color cyan_color = {0, 255, 255, SDL_ALPHA_OPAQUE};
 
 // Menu Asset Declarations
 SDL_Texture *menu_background;
@@ -95,7 +68,7 @@ int main(int argc, char* argv[]) {
     game_state = MAIN_MENU;
 
     initSDL(&game_display);
-    loadTextures();
+    loadTextures(&game_display);
 
     Uint32 fps_lasttime = SDL_GetTicks();
     Uint32 fps_current = 0;
@@ -144,18 +117,18 @@ static void handleInput(void) {
         switch (event.type) {
             case SDL_KEYDOWN: // TODO: CLEANUP Menu-traversing logic
                 if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
-                    clearScreen(cyan_color);
+                    clearScreen((SDL_Color)CYAN_COLOR);
                     if (game_state == PLAYING) game_state = PAUSED;
                     else if (game_state == MAIN_MENU) game_state = EXITING;
                     else if (game_state == PAUSED || game_state == LOADING) game_state = MAIN_MENU;
                 }
                 else if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
-                    clearScreen(cyan_color);
+                    clearScreen((SDL_Color)CYAN_COLOR);
                     initializing = SDL_TRUE;
                     game_state++;
                 }
                 else if (game_state == PAUSED) {
-                    clearScreen(cyan_color);
+                    clearScreen((SDL_Color)CYAN_COLOR);
                     game_state = PLAYING;
                 } 
                 if (game_state == PLAYING) { // During game--
@@ -259,42 +232,4 @@ static void renderGame(void) {
 static void clearScreen(SDL_Color clear_color) {
     SDL_SetRenderDrawColor(game_display.renderer, clear_color.r, clear_color.g, clear_color.b, clear_color.a);
     SDL_RenderClear(game_display.renderer);
-}
-
-static void loadTextures(void) {
-    // Load Menu Assets
-    menu_background = IMG_LoadTexture(game_display.renderer, MENU_BACKGROUND_PATH);
-    int img_w = 0; int img_h = 0;
-    SDL_QueryTexture(menu_background, NULL, NULL, &img_w, &img_h);
-    menu_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
-
-    loading_image = IMG_LoadTexture(game_display.renderer, LOAD_SCREEN_PATH);
-    SDL_QueryTexture(loading_image, NULL, NULL, &img_w, &img_h);
-    load_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
-
-    paused_image = IMG_LoadTexture(game_display.renderer, PAUSE_SCREEN_PATH);
-    SDL_QueryTexture(paused_image, NULL, NULL, &img_w, &img_h);
-    paused_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
-
-    // Load Tiles
-    tile_image = IMG_LoadTexture(game_display.renderer, TILE_PATH);
-    tile2_image = IMG_LoadTexture(game_display.renderer, TILE2_PATH);
-    tiles[0] = tile_image;
-    tiles[1] = tile2_image;
-    
-    // Load Fonts
-    title_font = TTF_OpenFont(FONT_PATH, 32);
-    game_font = TTF_OpenFont(FONT_PATH, 22);
-
-    // Use Fonts
-    start_text_surface = TTF_RenderText_Solid(title_font, "Press Any Key To Start.", white_color);
-    start_text_texture = SDL_CreateTextureFromSurface(game_display.renderer, start_text_surface);
-    SDL_QueryTexture(start_text_texture, NULL, NULL, &img_w, &img_h);
-    start_text_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
-
-    play_sym_surface = TTF_RenderText_Solid(game_font, "@", white_color);
-    play_sym_texture = SDL_CreateTextureFromSurface(game_display.renderer, play_sym_surface);
-    tiles[2] = play_sym_texture;
-
-    player.play_sym_rect = (SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32};
 }

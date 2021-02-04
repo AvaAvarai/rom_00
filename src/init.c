@@ -39,3 +39,41 @@ extern void cleanup(Game_Display *game_display, int exitcode) {
 
     exit(exitcode);
 }
+
+extern void loadTextures(Game_Display *game_display) {
+    // Load Menu Assets
+    menu_background = IMG_LoadTexture(game_display->renderer, MENU_BACKGROUND_PATH);
+    int img_w = 0; int img_h = 0;
+    SDL_QueryTexture(menu_background, NULL, NULL, &img_w, &img_h);
+    menu_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
+
+    loading_image = IMG_LoadTexture(game_display->renderer, LOAD_SCREEN_PATH);
+    SDL_QueryTexture(loading_image, NULL, NULL, &img_w, &img_h);
+    load_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
+
+    paused_image = IMG_LoadTexture(game_display->renderer, PAUSE_SCREEN_PATH);
+    SDL_QueryTexture(paused_image, NULL, NULL, &img_w, &img_h);
+    paused_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
+
+    // Load Tiles
+    tile_image = IMG_LoadTexture(game_display->renderer, TILE_PATH);
+    tile2_image = IMG_LoadTexture(game_display->renderer, TILE2_PATH);
+    tiles[0] = tile_image;
+    tiles[1] = tile2_image;
+    
+    // Load Fonts
+    title_font = TTF_OpenFont(FONT_PATH, 32);
+    game_font = TTF_OpenFont(FONT_PATH, 22);
+
+    // Use Fonts
+    start_text_surface = TTF_RenderText_Solid(title_font, "Press Any Key To Start.", (SDL_Color)WHITE_COLOR);
+    start_text_texture = SDL_CreateTextureFromSurface(game_display->renderer, start_text_surface);
+    SDL_QueryTexture(start_text_texture, NULL, NULL, &img_w, &img_h);
+    start_text_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
+
+    play_sym_surface = TTF_RenderText_Solid(game_font, "@", (SDL_Color)WHITE_COLOR);
+    play_sym_texture = SDL_CreateTextureFromSurface(game_display->renderer, play_sym_surface);
+    tiles[2] = play_sym_texture;
+
+    player.play_sym_rect = (SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32};
+}
