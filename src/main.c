@@ -5,15 +5,6 @@
 #include "init.h"
 #include "defs.h"
 
-// Function declarations TODO: Add rendering class, Add controls class
-static void renderFrame(void); // Entry-point function to rendering module.
-static void clearScreen(SDL_Color);
-static void renderMenu(void);
-static void renderLoading(void);
-static void renderPaused(void);
-static void renderGame(void);
-static void handleInput(void); // Entry-point function to controls module.
-
 // Game Data Structure Declarations
 Game_Display game_display;
 Player player;
@@ -41,6 +32,15 @@ SDL_Texture *play_sym_texture;
 SDL_Texture *tiles[3];
 SDL_Texture *tile_image;
 SDL_Texture *tile2_image;
+
+// Function declarations TODO: Add rendering class, Add controls class
+static void renderFrame(void); // Entry-point function to rendering module.
+static void clearScreen(SDL_Color);
+static void renderMenu(void);
+static void renderLoading(void);
+static void renderPaused(void);
+static void renderGame(void);
+static void handleInput(void); // Entry-point function to controls module.
 
 // Mock Game Data
 int map[9][9] = {

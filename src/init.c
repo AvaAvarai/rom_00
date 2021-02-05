@@ -1,5 +1,7 @@
 #include "init.h"
+#include "stdio.h"
 
+// TODO: Streamline without game_display parameter
 extern void initSDL(Game_Display *game_display) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize SDL: %s\n", SDL_GetError());
@@ -72,8 +74,14 @@ extern void loadTextures(Game_Display *game_display) {
     start_text_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
 
     play_sym_surface = TTF_RenderText_Solid(game_font, "@", (SDL_Color)WHITE_COLOR);
-    play_sym_texture = SDL_CreateTextureFromSurface(game_display->renderer, play_sym_surface);
+    //play_sym_texture = SDL_CreateTextureFromSurface(game_display->renderer, play_sym_surface);
+    play_sym_texture = loadSym('@');
     tiles[2] = play_sym_texture;
 
     player.play_sym_rect = (SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32};
+}
+
+extern SDL_Texture *loadSym(char sym) {
+    SDL_Surface *out_surface = TTF_RenderGlyph_Solid(game_font, sym, (SDL_Color)WHITE_COLOR);
+    return SDL_CreateTextureFromSurface(game_display.renderer, out_surface);
 }
