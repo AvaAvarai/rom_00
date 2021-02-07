@@ -34,7 +34,6 @@ extern SDL_Texture *tiles[3];
 extern SDL_Texture *tile_image;
 extern SDL_Texture *tile2_image;
 
-extern Player player;
 extern Game_Display game_display;
 
 #endif // ROM_INIT_H

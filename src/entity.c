@@ -1,23 +1,9 @@
 #include "entity.h"
-#include "init.h"
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
-#include "defs.h"
-#include "stdio.h"
-#include "string.h"
 
 // WIP Entity class
 
-struct Entity {
-    char *name;
-    int id;
-    int x;
-    int y;
-    SDL_Texture *texture;
-};
-
-extern struct Entity *initEntity(char *name, int x, int y) {
-   struct Entity *out = malloc(sizeof(struct Entity));
+extern Entity *initEntity(char *name, int x, int y) {
+   Entity *out = malloc(sizeof(Entity));
    out->name = name;
    out->x = x;
    out->y = y;
@@ -25,4 +11,9 @@ extern struct Entity *initEntity(char *name, int x, int y) {
        out->texture = loadSym('@');
    }
    return out;
+}
+
+extern void moveEntity(Entity *entity, int mx, int my) {
+    entity->x += mx;
+    entity->y += my;
 }

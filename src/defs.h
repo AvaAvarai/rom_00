@@ -21,19 +21,11 @@
 #define TILE2_PATH           "assets/tile2.png"
 #define FONT_PATH            "assets/dungeon-grunge.ttf"
 
-// Data Structures
 typedef struct Game_Displays {
     SDL_Renderer *renderer;
     SDL_Window *window;
 } Game_Display;
 
-typedef struct Player_Data {
-    int8_t player_x;
-    int8_t player_y;
-    SDL_Rect play_sym_rect;
-} Player;
-
-// Enums
 typedef enum Game_States {
     EXITING   = -1,
     MAIN_MENU =  0,

@@ -72,13 +72,6 @@ extern void loadTextures(Game_Display *game_display) {
     start_text_texture = SDL_CreateTextureFromSurface(game_display->renderer, start_text_surface);
     SDL_QueryTexture(start_text_texture, NULL, NULL, &img_w, &img_h);
     start_text_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
-
-    play_sym_surface = TTF_RenderText_Solid(game_font, "@", (SDL_Color)WHITE_COLOR);
-    //play_sym_texture = SDL_CreateTextureFromSurface(game_display->renderer, play_sym_surface);
-    play_sym_texture = loadSym('@');
-    tiles[2] = play_sym_texture;
-
-    player.play_sym_rect = (SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32};
 }
 
 extern SDL_Texture *loadSym(char sym) {

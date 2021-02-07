@@ -4,10 +4,11 @@
 #include "stdint.h"
 #include "init.h"
 #include "defs.h"
+#include "entity.h"
 
 // Game Data Structure Declarations
 Game_Display game_display;
-Player player;
+Entity *player;
 Game_State game_state;
 SDL_bool initializing;
 
@@ -25,8 +26,6 @@ SDL_Rect start_text_rect;
 // Font Asset Declarations
 TTF_Font *title_font;
 TTF_Font *game_font;
-SDL_Surface *play_sym_surface;
-SDL_Texture *play_sym_texture;
 
 // Game Asset Declarations
 SDL_Texture *tiles[3];
@@ -56,20 +55,17 @@ int map[9][9] = {
 };
 
 int main(int argc, char* argv[]) {
-    
     // Initialization
     (void)argc; (void)argv;
     memset(&game_display, 0, sizeof(Game_Display));
-    memset(&player, 0, sizeof(Player));
+    memset(&player, 0, sizeof(Entity));
     memset(&game_state, 0, sizeof(Game_State));
     memset(&initializing, 0, sizeof(initializing));
     initializing = SDL_TRUE;
-    player.player_x = 0; player.player_y = 0;
     game_state = MAIN_MENU;
-
     initSDL(&game_display);
     loadTextures(&game_display);
-
+    player = initEntity("Player", 5, 5);
     Uint32 fps_lasttime = SDL_GetTicks();
     Uint32 fps_current = 0;
     Uint32 fps_frames = 0;
@@ -111,6 +107,7 @@ int main(int argc, char* argv[]) {
 
 // END OF MAIN -- TODO: Move functions to following modules. (1. Rendering 2. Input 3. Init | Load | Cleanup | Closing)
 
+// TODO: Move handleInput to control class
 static void handleInput(void) {
     SDL_Event event;
     if (SDL_PollEvent(&event)) {
@@ -135,27 +132,23 @@ static void handleInput(void) {
                     switch (event.key.keysym.sym) {
                         case SDLK_a:
                         case SDLK_KP_7:
-                            player.player_x--;
-                            player.player_y++;
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            moveEntity(player, -1, 1);
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_w:
                         case SDLK_KP_9:
-                            player.player_x++;
-                            player.player_y++;
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            moveEntity(player, 1, 1);
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_s:
                         case SDLK_KP_1:
-                            player.player_x--;
-                            player.player_y--;
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            moveEntity(player, -1, -1);
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_d:
                         case SDLK_KP_3:
-                            player.player_x++;
-                            player.player_y--;
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player.player_x, player.player_y);
+                            moveEntity(player, 1, -1);
+                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         default:
                             break;
@@ -171,6 +164,7 @@ static void handleInput(void) {
     }
 }
 
+// TODO: Move rendering funcs to render class
 static void renderFrame(void) {
     switch (game_state) {
         case MAIN_MENU:
@@ -225,7 +219,7 @@ static void renderGame(void) {
         }
     }
     // Draw Player
-    SDL_RenderCopy(game_display.renderer, tiles[2], NULL, &player.play_sym_rect);
+    SDL_RenderCopy(game_display.renderer, player->texture, NULL, &(const SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32});
     if (initializing) initializing = SDL_FALSE; // Done initializing after first renderGame call.
 }
 
