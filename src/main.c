@@ -41,19 +41,6 @@ static void renderPaused(void);
 static void renderGame(void);
 static void handleInput(void); // Entry-point function to controls module.
 
-// Mock Game Data
-int map[9][9] = {
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 1, 1, 0},
-    {0, 1, 0, 0, 0, 0, 0, 1, 0},
-    {0, 0, 1, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 1, 0, 0, 0, 1, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0},
-    {0, 0, 0, 0, 0, 0, 0, 0, 0}
-};
-
 int main(int argc, char* argv[]) {
     // Initialization
     (void)argc; (void)argv;
@@ -135,22 +122,18 @@ static void handleInput(void) {
                         case SDLK_a:
                         case SDLK_KP_7:
                             moveEntity(player, 1, -1);
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_w:
                         case SDLK_KP_9:
                             moveEntity(player, 1, 1);
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_s:
                         case SDLK_KP_1:
                             moveEntity(player, -1, -1);
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_d:
                         case SDLK_KP_3:
                             moveEntity(player, -1, 1);
-                            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_r:
                             player->x = 0;
@@ -172,6 +155,7 @@ static void handleInput(void) {
 
 // TODO: Move rendering funcs to render class
 static void renderFrame(void) {
+    clearScreen((SDL_Color)CYAN_COLOR);
     switch (game_state) {
         case MAIN_MENU:
             renderMenu();
@@ -206,7 +190,7 @@ static void renderPaused(void) {
 
 static void renderGame(void) {
     int player_sight = 5;
-    clearScreen((SDL_Color)CYAN_COLOR);
+
     for (int rows = player->x - player_sight; rows < player->x + player_sight; rows++) {
         for (int cols = player->y - player_sight; cols < player->y + player_sight; cols++) {
 
@@ -215,20 +199,9 @@ static void renderGame(void) {
             int new_tile_y = (rows + cols) * (TILE_HEIGHT / 2) + WINDOW_HEIGHT / 4 - TILE_HEIGHT / 2;
             SDL_Rect tile_rect = {new_tile_x, new_tile_y, TILE_WIDTH, TILE_HEIGHT};
             
-            if (cols < 0 && rows < 0 && (size_t)rows < sizeof(map) / sizeof(map[0]) && (size_t)cols < sizeof(map[0]) / sizeof(int)) {continue;}
-
             SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
-            if (rows == 0 && cols == 0) SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
-
-            // Tile Selection
-            //if (map[rows][cols] == 0) SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
-            //else SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
            
-            // Debug Logging
-            if (initializing) {
-                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_tile_x, new_tile_y);
-                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "map[%d][%d] -> %d", (int)rows, (int)cols, map[rows][cols]);
-            }
+            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_tile_x, new_tile_y);
         }
     }
     // Draw Player

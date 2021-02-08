@@ -16,4 +16,5 @@ extern Entity *initEntity(char *name, int x, int y) {
 extern void moveEntity(Entity *entity, int mx, int my) {
     entity->x += mx;
     entity->y += my;
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", entity->x, entity->y);
 }
