@@ -6,6 +6,10 @@
 #include "defs.h"
 #include "entity.h"
 
+// Game Window Sizes
+int window_width = WINDOW_WIDTH;
+int window_height = WINDOW_HEIGHT;
+
 // Game Data Structure Declarations
 Game_Display game_display;
 Entity *player;
@@ -33,13 +37,13 @@ SDL_Texture *tile_image;
 SDL_Texture *tile2_image;
 
 // Function declarations TODO: Add rendering class, Add controls class
-static void renderFrame(void); // Entry-point function to rendering module.
-static void clearScreen(SDL_Color);
-static void renderMenu(void);
-static void renderLoading(void);
-static void renderPaused(void);
-static void renderGame(void);
-static void handleInput(void); // Entry-point function to controls module.
+void renderFrame(void); // Entry-point function to rendering module.
+void clearScreen(SDL_Color);
+void renderMenu(void);
+void renderLoading(void);
+void renderPaused(void);
+void renderGame(void);
+void handleInput(void); // Entry-point function to controls module.
 
 int main(int argc, char* argv[]) {
     // Initialization
@@ -96,65 +100,8 @@ int main(int argc, char* argv[]) {
 
 // END OF MAIN -- TODO: Move functions to following modules. (1. Rendering 2. Input 3. Init | Load | Cleanup | Closing)
 
-// TODO: Move handleInput to control class
-static void handleInput(void) {
-    SDL_Event event;
-    if (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_KEYDOWN: // TODO: CLEANUP Menu-traversing logic
-                if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
-                    clearScreen((SDL_Color)CYAN_COLOR);
-                    if (game_state == PLAYING) game_state = PAUSED;
-                    else if (game_state == MAIN_MENU) game_state = EXITING;
-                    else if (game_state == PAUSED || game_state == LOADING) game_state = MAIN_MENU;
-                }
-                else if (game_state == MAIN_MENU || game_state == LOADING) { // Entering game--
-                    clearScreen((SDL_Color)CYAN_COLOR);
-                    initializing = SDL_TRUE;
-                    game_state++;
-                }
-                else if (game_state == PAUSED) {
-                    clearScreen((SDL_Color)CYAN_COLOR);
-                    game_state = PLAYING;
-                } 
-                if (game_state == PLAYING) { // During game--
-                    switch (event.key.keysym.sym) {
-                        case SDLK_a:
-                        case SDLK_KP_7:
-                            moveEntity(player, 1, -1);
-                            break;
-                        case SDLK_w:
-                        case SDLK_KP_9:
-                            moveEntity(player, 1, 1);
-                            break;
-                        case SDLK_s:
-                        case SDLK_KP_1:
-                            moveEntity(player, -1, -1);
-                            break;
-                        case SDLK_d:
-                        case SDLK_KP_3:
-                            moveEntity(player, -1, 1);
-                            break;
-                        case SDLK_r:
-                            player->x = 0;
-                            player->y = 0;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                break;
-            case SDL_QUIT:
-                game_state = EXITING;
-                break;
-            default:
-                break;
-        }
-    }
-}
-
 // TODO: Move rendering funcs to render class
-static void renderFrame(void) {
+void renderFrame(void) {
     clearScreen((SDL_Color)CYAN_COLOR);
     switch (game_state) {
         case MAIN_MENU:
@@ -175,24 +122,24 @@ static void renderFrame(void) {
     SDL_RenderPresent(game_display.renderer);
 }
 
-static void renderMenu(void) {
+void renderMenu(void) {
     SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_rect);
     SDL_RenderCopy(game_display.renderer, start_text_texture, NULL, &start_text_rect);
 }
 
-static void renderLoading(void) {
+void renderLoading(void) {
     SDL_RenderCopy(game_display.renderer, loading_image, NULL, &load_rect);
 }
 
-static void renderPaused(void) {
+void renderPaused(void) {
     SDL_RenderCopy(game_display.renderer, paused_image, NULL, &paused_rect);
 }
 
-static void renderGame(void) {
-    int player_sight = 5;
+void renderGame(void) {
+    int player_sight = 2;
 
-    for (int rows = player->x - player_sight; rows < player->x + player_sight; rows++) {
-        for (int cols = player->y - player_sight; cols < player->y + player_sight; cols++) {
+    for (int rows = player->x - player_sight - 1; rows < player->x + player_sight; rows++) {
+        for (int cols = player->y - player_sight - 1; cols < player->y + player_sight; cols++) {
 
             // Screen Coordinate Selection
             int new_tile_x = (rows - cols) * (TILE_WIDTH / 2) + WINDOW_WIDTH / 2 - TILE_WIDTH / 2;
@@ -200,8 +147,6 @@ static void renderGame(void) {
             SDL_Rect tile_rect = {new_tile_x, new_tile_y, TILE_WIDTH, TILE_HEIGHT};
             
             SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
-           
-            SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> x: %d y: %d", new_tile_x, new_tile_y);
         }
     }
     // Draw Player
@@ -209,7 +154,7 @@ static void renderGame(void) {
     if (initializing) initializing = SDL_FALSE; // Done initializing after first renderGame call.
 }
 
-static void clearScreen(SDL_Color clear_color) {
+void clearScreen(SDL_Color clear_color) {
     SDL_SetRenderDrawColor(game_display.renderer, clear_color.r, clear_color.g, clear_color.b, clear_color.a);
     SDL_RenderClear(game_display.renderer);
 }
