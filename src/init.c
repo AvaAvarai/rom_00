@@ -38,7 +38,7 @@ extern void cleanup(Game_Display *game_display, int exitcode) {
     TTF_Quit();
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     SDL_Quit();
-
+    free(game_display);
     exit(exitcode);
 }
 

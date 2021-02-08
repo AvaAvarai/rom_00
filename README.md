@@ -1,6 +1,6 @@
 # rom_00
 
-A prototyping workspace for testing and working with SDL2 within the native C99 programming language.
+A prototyping workspace for learning and prototyping with SDL2 in the native C99 programming language.
 
 ## Project Goals
 

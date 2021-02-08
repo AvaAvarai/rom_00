@@ -101,6 +101,8 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(loading_image);
     SDL_DestroyTexture(paused_image);
     SDL_DestroyTexture(start_text_texture);
+    SDL_DestroyTexture(player->texture);
+    free(player);
     cleanup(&game_display, EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
@@ -132,7 +134,7 @@ static void handleInput(void) {
                     switch (event.key.keysym.sym) {
                         case SDLK_a:
                         case SDLK_KP_7:
-                            moveEntity(player, -1, 1);
+                            moveEntity(player, 1, -1);
                             SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
                             break;
                         case SDLK_w:
@@ -147,8 +149,12 @@ static void handleInput(void) {
                             break;
                         case SDLK_d:
                         case SDLK_KP_3:
-                            moveEntity(player, 1, -1);
+                            moveEntity(player, -1, 1);
                             SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player Moved -> x: %d y: %d", player->x, player->y);
+                            break;
+                        case SDLK_r:
+                            player->x = 0;
+                            player->y = 0;
                             break;
                         default:
                             break;
@@ -199,17 +205,24 @@ static void renderPaused(void) {
 }
 
 static void renderGame(void) {
-    for (size_t rows = 0; rows < sizeof(map) / sizeof(map[0]); rows++) {
-        for (size_t cols = 0; cols < sizeof(map[0]) / sizeof(int); cols++) {
-            
+    int player_sight = 5;
+    clearScreen((SDL_Color)CYAN_COLOR);
+    for (int rows = player->x - player_sight; rows < player->x + player_sight; rows++) {
+        for (int cols = player->y - player_sight; cols < player->y + player_sight; cols++) {
+
             // Screen Coordinate Selection
             int new_tile_x = (rows - cols) * (TILE_WIDTH / 2) + WINDOW_WIDTH / 2 - TILE_WIDTH / 2;
             int new_tile_y = (rows + cols) * (TILE_HEIGHT / 2) + WINDOW_HEIGHT / 4 - TILE_HEIGHT / 2;
             SDL_Rect tile_rect = {new_tile_x, new_tile_y, TILE_WIDTH, TILE_HEIGHT};
             
+            if (cols < 0 && rows < 0 && (size_t)rows < sizeof(map) / sizeof(map[0]) && (size_t)cols < sizeof(map[0]) / sizeof(int)) {continue;}
+
+            SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
+            if (rows == 0 && cols == 0) SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
+
             // Tile Selection
-            if (map[cols][rows] == 0) SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
-            else SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
+            //if (map[rows][cols] == 0) SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
+            //else SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
            
             // Debug Logging
             if (initializing) {
