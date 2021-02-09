@@ -74,7 +74,7 @@ extern void loadTextures(Game_Display *game_display) {
     start_text_rect = (SDL_Rect){WINDOW_WIDTH/2 - img_w/2, WINDOW_HEIGHT/2 - img_h/2, img_w, img_h};
 }
 
-extern SDL_Texture *loadSym(char sym) {
-    SDL_Surface *out_surface = TTF_RenderGlyph_Solid(game_font, sym, (SDL_Color)WHITE_COLOR);
+extern SDL_Texture *loadSym(char sym, SDL_Color color) {
+    SDL_Surface *out_surface = TTF_RenderGlyph_Solid(game_font, sym, color);
     return SDL_CreateTextureFromSurface(game_display.renderer, out_surface);
 }

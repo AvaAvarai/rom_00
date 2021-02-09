@@ -5,8 +5,8 @@
 
 // Window and Tile Constants
 #define WINDOW_TITLE  "Rom_00"
-#define WINDOW_WIDTH  640
-#define WINDOW_HEIGHT 480
+#define WINDOW_WIDTH  640 // Default
+#define WINDOW_HEIGHT 480 // Default
 #define TILE_WIDTH    64
 #define TILE_HEIGHT   32
 
@@ -17,7 +17,7 @@
 #define MENU_BACKGROUND_PATH "assets/menu.png"
 #define LOAD_SCREEN_PATH     "assets/loading.png"
 #define PAUSE_SCREEN_PATH    "assets/paused.png"
-#define TILE_PATH            "assets/test_tile.png"
+#define TILE_PATH            "assets/tile3.png"
 #define TILE2_PATH           "assets/tile2.png"
 #define FONT_PATH            "assets/dungeon-grunge.ttf"
 

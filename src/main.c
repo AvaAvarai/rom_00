@@ -5,6 +5,7 @@
 #include "init.h"
 #include "defs.h"
 #include "entity.h"
+#include "controls.h"
 
 // Game Window Sizes
 int window_width = WINDOW_WIDTH;
@@ -36,14 +37,14 @@ SDL_Texture *tiles[3];
 SDL_Texture *tile_image;
 SDL_Texture *tile2_image;
 
-// Function declarations TODO: Add rendering class, Add controls class
+// Function declarations
+// TODO: Add rendering class
 void renderFrame(void); // Entry-point function to rendering module.
 void clearScreen(SDL_Color);
 void renderMenu(void);
 void renderLoading(void);
 void renderPaused(void);
 void renderGame(void);
-void handleInput(void); // Entry-point function to controls module.
 
 int main(int argc, char* argv[]) {
     // Initialization
@@ -56,7 +57,7 @@ int main(int argc, char* argv[]) {
     game_state = MAIN_MENU;
     initSDL(&game_display);
     loadTextures(&game_display);
-    player = initEntity("Player", 5, 5);
+    player = initEntity("Player", 0, 0);
     Uint32 fps_lasttime = SDL_GetTicks();
     Uint32 fps_current = 0;
     Uint32 fps_frames = 0;
@@ -136,21 +137,27 @@ void renderPaused(void) {
 }
 
 void renderGame(void) {
-    int player_sight = 2;
+    //int player_sight = 2;
 
-    for (int rows = player->x - player_sight - 1; rows < player->x + player_sight; rows++) {
-        for (int cols = player->y - player_sight - 1; cols < player->y + player_sight; cols++) {
-
+    for (int rows = 0; rows < window_width; rows++) {
+        for (int cols = 0; cols < window_height; cols++) {
             // Screen Coordinate Selection
-            int new_tile_x = (rows - cols) * (TILE_WIDTH / 2) + WINDOW_WIDTH / 2 - TILE_WIDTH / 2;
-            int new_tile_y = (rows + cols) * (TILE_HEIGHT / 2) + WINDOW_HEIGHT / 4 - TILE_HEIGHT / 2;
+            int new_tile_x = (rows - cols) * (TILE_WIDTH / 2) + window_width / 2 - TILE_WIDTH / 2;
+            int new_tile_y = (rows + cols) * (TILE_HEIGHT / 2) - window_height / 2 + TILE_HEIGHT / 2;
             SDL_Rect tile_rect = {new_tile_x, new_tile_y, TILE_WIDTH, TILE_HEIGHT};
-            
+            // Skip out of screen bounds
+            if (new_tile_x >= window_width || new_tile_y >= window_height) continue;
+            // Debug logging
+            const Uint8 *state = SDL_GetKeyboardState(NULL);
+            if (state[SDL_SCANCODE_F1]) {
+                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> r: %d c: %d x: %d y: %d", rows, cols, new_tile_x, new_tile_y);
+            }
+
             SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
         }
     }
     // Draw Player
-    SDL_RenderCopy(game_display.renderer, player->texture, NULL, &(const SDL_Rect){WINDOW_WIDTH/2 - TILE_WIDTH/8, WINDOW_HEIGHT/2 - TILE_HEIGHT/2, 32, 32});
+    SDL_RenderCopy(game_display.renderer, player->texture, NULL, &(const SDL_Rect){window_width/2 - TILE_WIDTH/4, window_height/2 - TILE_HEIGHT/2, 32, 32});
     if (initializing) initializing = SDL_FALSE; // Done initializing after first renderGame call.
 }
 

@@ -8,7 +8,7 @@ extern Entity *initEntity(char *name, int x, int y) {
    out->x = x;
    out->y = y;
    if (strcmp(name, "Player") == 0) {
-       out->texture = loadSym('@');
+       out->texture = loadSym('@', (SDL_Color)CYAN_COLOR);
    }
    return out;
 }
