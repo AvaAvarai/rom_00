@@ -2,11 +2,13 @@
 #define ROM_DEFS_H
 
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+#include "SDL2/SDL_ttf.h"
 
 // Window and Tile Constants
 #define WINDOW_TITLE  "Rom_00"
-#define WINDOW_WIDTH  640 // Default
-#define WINDOW_HEIGHT 480 // Default
+#define WINDOW_WIDTH  800 // Default
+#define WINDOW_HEIGHT 600 // Default
 #define TILE_WIDTH    64
 #define TILE_HEIGHT   32
 

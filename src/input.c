@@ -1,6 +1,5 @@
-#include "controls.h"
+#include "input.h"
 
-// TODO: Move handleInput to control class
 void handleInput(void) {
     SDL_Event event;
     if (SDL_PollEvent(&event)) {
@@ -15,7 +14,7 @@ void handleInput(void) {
                         break;
                 }
                 break;
-            case SDL_KEYDOWN: // TODO: CLEANUP Menu-traversing logic
+            case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_ESCAPE) { // Exiting game--
                     if (game_state == PLAYING) game_state = PAUSED;
                     else if (game_state == MAIN_MENU) game_state = EXITING;
@@ -31,24 +30,23 @@ void handleInput(void) {
                 if (game_state == PLAYING) { // During game--
                     switch (event.key.keysym.sym) {
                         case SDLK_a:
-                        case SDLK_KP_7:
                             moveEntity(player, 1, -1);
                             break;
                         case SDLK_w:
-                        case SDLK_KP_9:
                             moveEntity(player, 1, 1);
                             break;
                         case SDLK_s:
-                        case SDLK_KP_1:
                             moveEntity(player, -1, -1);
                             break;
                         case SDLK_d:
-                        case SDLK_KP_3:
                             moveEntity(player, -1, 1);
                             break;
                         case SDLK_r:
-                            player->x = 0;
-                            player->y = 0;
+                            if (player->x != 0 && player->y != 0) {
+                                player->x = 0;
+                                player->y = 0;
+                                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player position reset to (0, 0)");
+                            }
                             break;
                         default:
                             break;

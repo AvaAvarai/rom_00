@@ -1,6 +1,6 @@
 #include "entity.h"
-
-// WIP Entity class
+#include "init.h"
+#include "string.h"
 
 extern Entity *initEntity(char *name, int x, int y) {
    Entity *out = malloc(sizeof(Entity));

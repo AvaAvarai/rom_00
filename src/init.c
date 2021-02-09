@@ -1,29 +1,31 @@
 #include "init.h"
 #include "stdio.h"
 
-// TODO: Streamline without game_display parameter
-extern void initSDL(Game_Display *game_display) {
+extern void initSDL(void) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize SDL: %s\n", SDL_GetError());
-        cleanup(game_display, EXIT_FAILURE);
+        cleanup(&game_display, EXIT_FAILURE);
     }
-    game_display->window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
-    if (!game_display->window) {
+    game_display.window = SDL_CreateWindow(WINDOW_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    if (!game_display.window) {
         SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize window: %s\n", SDL_GetError());
-        cleanup(game_display, EXIT_FAILURE);
+        cleanup(&game_display, EXIT_FAILURE);
     }
-    game_display->renderer = SDL_CreateRenderer(game_display->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!game_display->renderer) {
+    SDL_SetWindowMinimumSize(game_display.window, window_width, window_height);
+
+    game_display.renderer = SDL_CreateRenderer(game_display.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!game_display.renderer) {
         SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize renderer: %s\n", SDL_GetError());
-        cleanup(game_display, EXIT_FAILURE);
+        cleanup(&game_display, EXIT_FAILURE);
     }
+    
     if (IMG_Init(IMG_INIT_PNG) == 0) {
         SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize PNG loading libraries: %s\n", IMG_GetError());
-        cleanup(game_display, EXIT_FAILURE);
+        cleanup(&game_display, EXIT_FAILURE);
     }
     if (TTF_Init() == -1) {
         SDL_LogCritical(SDL_LOG_PRIORITY_CRITICAL, "Failed to initialize TTF loading libraries: %s\n", TTF_GetError());
-        cleanup(game_display, EXIT_FAILURE);
+        cleanup(&game_display, EXIT_FAILURE);
     }
 }
 

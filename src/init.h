@@ -1,16 +1,16 @@
 #ifndef ROM_INIT_H
 #define ROM_INIT_H
 
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
-#include "SDL2/SDL_ttf.h"
 #include "defs.h"
 
-extern void initSDL(Game_Display *game_display);
+extern void initSDL(void);
 extern void cleanup(Game_Display *game_display, int exitcode);
 extern void loadTextures(Game_Display *game_display);
 
 extern SDL_Texture *loadSym(char sym, SDL_Color color);
+
+extern int window_width;
+extern int window_height;
 
 extern SDL_Texture *menu_background;
 extern SDL_Rect menu_rect;

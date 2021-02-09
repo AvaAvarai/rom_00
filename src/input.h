@@ -1,9 +1,6 @@
-#ifndef ROM_CONTROLS_H
-#define ROM_CONTROLS_H
+#ifndef ROM_INPUT_H
+#define ROM_INPUT_H
 
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
-#include "SDL2/SDL_ttf.h"
 #include "defs.h"
 #include "entity.h"
 
@@ -16,4 +13,4 @@ extern int window_height;
 
 extern void handleInput(void);
 
-#endif // ROM_CONTROLS_H
+#endif // ROM_INPUT_H

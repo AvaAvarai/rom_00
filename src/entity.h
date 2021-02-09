@@ -1,16 +1,11 @@
 #ifndef ROM_ENTITY_H
 #define ROM_ENTITY_H
 
-#include "init.h"
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
 #include "defs.h"
-#include "stdio.h"
-#include "string.h"
 
 typedef struct Entity_Data {
     char *name;
-    int id;
+    int uid; // Not implemented
     int x;
     int y;
     SDL_Texture *texture;
