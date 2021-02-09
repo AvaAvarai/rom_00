@@ -54,8 +54,10 @@ extern void renderGame(void) { // TODO: Reapproach render loop?
             SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
         }
     }
+    
     // Draw Player
-    // SDL_RenderCopy(game_display.renderer, player->texture, NULL, &(const SDL_Rect){window_width/2 - TILE_WIDTH/4, window_height/2 - TILE_HEIGHT/2, 32, 32});
+    SDL_Rect play_rect = {window_width/2 - TILE_WIDTH/4, window_height/2 - TILE_HEIGHT/2, 32, 32};
+    SDL_RenderCopy(game_display.renderer, player->texture, NULL, &play_rect);
     if (initializing) initializing = SDL_FALSE; // Done initializing after first renderGame call.
 }
 

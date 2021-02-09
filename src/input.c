@@ -42,7 +42,7 @@ void handleInput(void) {
                             moveEntity(player, -1, 1);
                             break;
                         case SDLK_r:
-                            if (player->x != 0 && player->y != 0) {
+                            if (!(player->x == 0 && player->y == 0)) {
                                 player->x = 0;
                                 player->y = 0;
                                 SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Player position reset to (0, 0)");
