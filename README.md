@@ -20,7 +20,7 @@ While looking for learning resources on SDL2 I found a majority of resources use
 
 ## Assets Used
 
-- Current font used, dungeon-grunge.ttf is found at https://fontstruct.com and the license for it is in the `\assets` folder.
+- Current font used, dungeon-grunge.ttf is found at https://fontstruct.com and it's license is in the `\assets` folder
 - Tiles and menu screen images created by myself with paint.net
 
 ## Dependencies

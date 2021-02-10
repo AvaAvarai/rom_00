@@ -4,8 +4,8 @@
 #include "defs.h"
 
 extern void initSDL(void);
-extern void cleanup(Game_Display *game_display, int exitcode);
-extern void loadTextures(Game_Display *game_display);
+extern void cleanup(int exitcode);
+extern void loadTextures(void);
 
 extern SDL_Texture *loadSym(char sym, SDL_Color color);
 

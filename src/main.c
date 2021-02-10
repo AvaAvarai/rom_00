@@ -35,6 +35,7 @@ SDL_Texture *tile_image;
 SDL_Texture *tile2_image;
 
 // TODO: Add map loading class
+int map[100][100];
 
 int main(int argc, char* argv[]) {
     // Initialization
@@ -43,13 +44,17 @@ int main(int argc, char* argv[]) {
     memset(&player, 0, sizeof(Entity));
     memset(&game_state, 0, sizeof(Game_State));
     memset(&initializing, 0, sizeof(initializing));
+    
+    memset(&map, 0, sizeof(map));
+    map[50][50] = 1;
+
     initializing = SDL_TRUE;
     game_state = MAIN_MENU;
     
     initSDL();
-    loadTextures(&game_display);
+    loadTextures();
     SDL_GetWindowSize(game_display.window, &window_width, &window_height);
-    player = initEntity("Player", 0, 0);
+    player = initEntity("Player", 50, 50);
 
     Uint32 fps_lasttime = SDL_GetTicks();
     Uint32 fps_current = 0;
@@ -88,7 +93,7 @@ int main(int argc, char* argv[]) {
     SDL_DestroyTexture(start_text_texture);
     SDL_DestroyTexture(player->texture);
     free(player);
-    cleanup(&game_display, EXIT_SUCCESS);
+    cleanup(EXIT_SUCCESS);
     return EXIT_SUCCESS;
 }
 

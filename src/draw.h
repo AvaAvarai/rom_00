@@ -23,6 +23,8 @@ extern SDL_Rect start_text_rect;
 
 extern SDL_Texture *tiles[3];
 
+extern int map[100][100];
+
 extern void renderFrame(void);
 extern void clearScreen(SDL_Color);
 extern void renderMenu(void);

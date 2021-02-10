@@ -23,7 +23,7 @@ extern void renderFrame(void) {
 
 extern void renderMenu(void) {
     SDL_RenderCopy(game_display.renderer, menu_background, NULL, &menu_rect);
-    SDL_RenderCopy(game_display.renderer, start_text_texture, NULL, &start_text_rect);
+    if (SDL_GetTicks() % 1000 <= 500) SDL_RenderCopy(game_display.renderer, start_text_texture, NULL, &start_text_rect);
 }
 
 extern void renderLoading(void) {
@@ -35,7 +35,7 @@ extern void renderPaused(void) {
 }
 
 extern void renderGame(void) { // TODO: Reapproach render loop?
-    int player_sight = 4;
+    int player_sight = 25;
 
     for (int rows = -player_sight; rows <= player_sight; rows++) {
         for (int cols = -player_sight; cols <= player_sight; cols++) {
@@ -43,15 +43,15 @@ extern void renderGame(void) { // TODO: Reapproach render loop?
             int new_tile_x = (rows - cols) * (TILE_WIDTH / 2) + window_width / 2 - TILE_WIDTH / 2;
             int new_tile_y = (rows + cols) * (TILE_HEIGHT / 2) + window_height / 2 - TILE_HEIGHT / 2;
             SDL_Rect tile_rect = {new_tile_x, new_tile_y, TILE_WIDTH, TILE_HEIGHT};
-            // Skip out of screen bounds
-            if (new_tile_x < 0 - TILE_WIDTH || new_tile_y < 0 - TILE_HEIGHT) continue;
-            if (new_tile_x >= window_width && new_tile_y >= window_height) continue;
+            // Skip out of map bounds
+            if (player->x + rows < 0 || player->y + cols < 0 || player->x + rows > 99 || player->y + cols > 99) continue;
             // Debug logging WARN: WILL LAG.
             const Uint8 *state = SDL_GetKeyboardState(NULL);
             if (state[SDL_SCANCODE_F1]) {
                 SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Placing Tile -> r: %d c: %d x: %d y: %d", rows, cols, new_tile_x, new_tile_y);
             }
-            SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
+            if (map[player->x + rows][player->y + cols] == 0) SDL_RenderCopy(game_display.renderer, tiles[0], NULL, &tile_rect);
+            else SDL_RenderCopy(game_display.renderer, tiles[1], NULL, &tile_rect);
         }
     }
     

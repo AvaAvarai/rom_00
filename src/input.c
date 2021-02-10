@@ -29,16 +29,16 @@ void handleInput(void) {
                 } 
                 if (game_state == PLAYING) { // During game--
                     switch (event.key.keysym.sym) {
-                        case SDLK_a:
+                        case SDLK_d:
                             moveEntity(player, 1, -1);
                             break;
-                        case SDLK_w:
+                        case SDLK_s:
                             moveEntity(player, 1, 1);
                             break;
-                        case SDLK_s:
+                        case SDLK_w:
                             moveEntity(player, -1, -1);
                             break;
-                        case SDLK_d:
+                        case SDLK_a:
                             moveEntity(player, -1, 1);
                             break;
                         case SDLK_r:
